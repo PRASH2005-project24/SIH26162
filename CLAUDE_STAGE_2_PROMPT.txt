@@ -1,0 +1,168 @@
+We are starting STAGE 2 of SIH26162.
+
+Read `STAGE_2_ML_IMPLEMENTATION.md` completely before changing code.
+
+Also inspect the existing repository and documentation, especially:
+- Stage 1/1B implementation
+- PostgreSQL/PostGIS setup/schema
+- FIRMS collection
+- OSM/Overpass
+- Dynamic World/Earth Engine
+- persistence/spatial-temporal processing
+- existing FastAPI architecture
+- Stage 3 expected-output/integration documentation
+
+DO NOT immediately write code.
+
+First inspect and report:
+1. What Stage 1 provides.
+2. What Stage 1B provides.
+3. Existing database/schema.
+4. Existing Python environment/dependencies.
+5. Existing API conventions.
+6. Existing GIS/enrichment outputs available to Stage 2.
+7. Existing Stage 3 expectations.
+8. Any conflicts between the specification and the repository.
+
+Then propose the implementation plan.
+
+After that, implement Stage 2 in this order:
+
+1. ML environment
+- Isolated ML dependency setup.
+- GPU/CUDA diagnostic.
+- Detect NVIDIA RTX 3050 6GB if available.
+- CPU fallback.
+
+2. Demo dataset
+- Reproducible synthetic dataset with fixed seed.
+- All five classes:
+  Industrial Fire
+  Wildfire / Natural Fire
+  Agricultural Fire
+  Persistent Thermal Source
+  Unknown / Other
+- FIRMS + OSM + Dynamic World + temporal/persistence features.
+- Realistic variation, missing values, spatial/temporal variation.
+- Clearly mark as SYNTHETIC/DEVELOPMENT.
+- Do not use Stage 3 mock events as ground truth.
+- Do not derive target directly from an input feature.
+
+3. PostgreSQL/PostGIS
+- Use existing `sih26162` database and DATABASE_URL.
+- Do not create another database.
+- Reuse existing data/tables where appropriate.
+- Add only necessary Stage 2 structures.
+- Make demo loading repeatable and duplicate-safe.
+- Report row count, class distribution and missing values.
+
+4. Validation and feature engineering
+- Centralized preprocessing.
+- Validate schema, labels, coordinates, timestamps, missing values and duplicates.
+- Use FIRMS + OSM + Dynamic World + persistence.
+- Prevent target leakage.
+- Prevent future observations from entering historical predictions.
+- Use the exact same preprocessing for training and inference.
+
+5. Train/validation/test
+- Implement a defensible spatial/temporal-aware split.
+- Keep test isolated.
+- Document the strategy.
+
+6. Baseline ML
+- Start with Random Forest.
+- Optionally add XGBoost if appropriate and compatible with available CUDA.
+- Do not start with deep learning.
+- Check/report class imbalance.
+
+7. Evaluation
+Produce:
+- accuracy
+- precision
+- recall
+- F1
+- macro F1
+- weighted F1
+- per-class metrics
+- confusion matrix
+
+Select using validation performance, not test performance.
+
+8. Model artifacts
+Save model, feature schema, label mapping, metrics and training metadata under the project's model directory. Make reload possible without retraining.
+
+9. Inference
+Create reusable inference:
+- load model/schema/labels
+- validate input
+- same preprocessing as training
+- predicted class
+- confidence
+- class probabilities where supported
+- structured output
+
+10. API
+Prefer the existing FastAPI architecture.
+Preferred conceptual endpoint: `POST /api/v1/ml/predict`
+Do not automatically create a separate port-5000 service.
+Keep Stage 3 mock mode working.
+
+Conceptual response:
+```json
+{
+  "predicted_class": "Industrial Fire",
+  "confidence": 0.91,
+  "class_probabilities": {
+    "Industrial Fire": 0.91,
+    "Wildfire / Natural Fire": 0.03,
+    "Agricultural Fire": 0.02,
+    "Persistent Thermal Source": 0.03,
+    "Unknown / Other": 0.01
+  }
+}
+```
+
+Do not fabricate key-factor explanations.
+
+Do not equate risk score with ML confidence.
+
+11. Tests
+Test dataset validation, feature engineering, leakage prevention, training, model save/load, inference, invalid input and database insertion/repeat safety.
+
+12. Documentation
+Create/update Stage 2 documentation with exact commands.
+
+STRICT BOUNDARIES:
+- Do not rebuild Stage 1.
+- Do not rebuild Stage 1B.
+- Do not duplicate OSM/Dynamic World.
+- Do not break PostgreSQL/PostGIS.
+- Do not redesign Stage 3.
+- Keep Stage 3 mock mode.
+- Do not implement alerting.
+- Do not hardcode credentials.
+- Do not expose secrets.
+
+REAL DATA LATER:
+The actual training dataset may be a 600k–800k row CSV combining FIRMS + OSM + Dynamic World + persistence + labels. The pipeline must accept it later without a complete redesign.
+
+Actually run diagnostics/tests that are possible. Do not merely create files.
+
+At the end report:
+1. Files created.
+2. Files modified.
+3. Files deliberately untouched.
+4. Environment setup commands.
+5. GPU diagnostic result.
+6. Demo generation command/result.
+7. Database loading command/result.
+8. Training command/result.
+9. Evaluation metrics.
+10. Model artifact location.
+11. Inference test/result.
+12. API endpoint and example request/response.
+13. Tests passed/failed.
+14. Known limitations.
+15. What remains when the real dataset arrives.
+
+Do not claim Stage 2 complete unless the working pipeline has actually been tested.
