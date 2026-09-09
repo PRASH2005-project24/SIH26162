@@ -1,0 +1,52 @@
+Do not use SQLite for local development. Docker is unavailable, but I will run native PostgreSQL + PostGIS directly on Windows.
+
+Keep Docker Compose files for future deployment, but configure the current local-development path to use native PostgreSQL/PostGIS at `localhost:5432`.
+
+Use environment-based configuration only. Expect a local `.env` value in this format:
+
+`DATABASE_URL=postgresql+asyncpg://postgres:MY_LOCAL_PASSWORD@localhost:5432/sih26162`
+
+Do not write my password into source code, `.env.example`, logs, or frontend code.
+
+Use PostGIS geometry/geography columns, spatial indexes, `ST_DWithin`, `ST_Distance`, `ST_Intersects`, and database migrations as planned. Update README and DEVELOPMENT.md with native Windows PostgreSQL/PostGIS setup, migration, run, and troubleshooting commands.
+
+After this change, continue Stage 1B using OpenStreetMap/Overpass and Google Dynamic World as previously specified.
+
+
+
+Update to my previous instructions:
+
+Do not use SQLite for local development. I want to use native PostgreSQL + PostGIS directly on Windows without Docker.
+
+Keep the Docker Compose setup unchanged for future deployment, but make native PostgreSQL/PostGIS the primary local development path.
+
+Assume I will install PostgreSQL, PostGIS, and create a local database named `sih26162` myself. Configure the backend to read the connection only from `.env`:
+
+`DATABASE_URL=postgresql+asyncpg://postgres:MY_LOCAL_PASSWORD@localhost:5432/sih26162`
+
+Requirements:
+
+- Do not place a real password in source code, `.env.example`, logs, API output, or frontend code.
+- Use PostgreSQL + PostGIS types and queries for all spatial work.
+- Keep geometry/geography columns, spatial indexes, migrations, `ST_Intersects`, `ST_DWithin`, and `ST_Distance`.
+- Remove or disable any planned SQLite/Shapely/PyProj fallback as the main local database path.
+- Add a clear startup/database-health error if native PostgreSQL/PostGIS is not installed or the `postgis` extension is missing.
+- Update README and DEVELOPMENT.md with exact Windows native setup steps:
+  1. install PostgreSQL;
+  2. install PostGIS through StackBuilder;
+  3. create database `sih26162`;
+  4. run `CREATE EXTENSION IF NOT EXISTS postgis;`;
+  5. create `.env`;
+  6. run migrations;
+  7. start backend and frontend without Docker.
+- Add a database-health endpoint that confirms PostgreSQL connection and PostGIS availability/version.
+
+After making this database configuration change, continue the Stage 1B work from my previous prompt: OpenStreetMap/Overpass enrichment, Google Dynamic World land-cover adapter, manual GeoJSON/CSV import, evidence storage, and tests.
+
+Stop after Stage 1B and show me:
+
+- files changed;
+- exact native PostgreSQL/PostGIS setup commands;
+- exact backend/frontend run commands;
+- how to verify PostGIS is working;
+- what I need to provide before Stage 2.

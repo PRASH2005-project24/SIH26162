@@ -1,0 +1,15 @@
+catboost==1.2.10
+fastapi==0.141.1
+joblib==1.6.0
+lightgbm==4.7.0
+matplotlib==3.11.1
+numpy==2.4.6
+pandas==3.0.5
+pydantic==2.13.5
+scikit-learn==1.9.0
+seaborn==0.13.2
+torch==2.4.1+cu121
+torchaudio==2.4.1+cu121
+torchvision==0.19.1+cu121
+uvicorn==0.52.4
+xgboost==3.2.0
