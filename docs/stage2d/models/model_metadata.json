@@ -1,0 +1,104 @@
+{
+  "model_type": "RandomForestClassifier",
+  "model_params": {
+    "n_estimators": 100,
+    "max_depth": 10,
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "training_datetime": "2026-09-05T05:39:05.498035",
+  "validation_accuracy": 0.9277246256239601,
+  "validation_macro_f1": 0.9241193219163857,
+  "validation_weighted_f1": 0.9275309647809004,
+  "test_accuracy": 0.9337720472892834,
+  "test_macro_f1": 0.9153623194587285,
+  "test_weighted_f1": 0.9333082349026127,
+  "validation_per_class": {
+    "agricultural": {
+      "precision": 0.9190605408440161,
+      "recall": 0.9236411510250141,
+      "f1": 0.9213451526663853,
+      "support": 10634
+    },
+    "industrial": {
+      "precision": 0.9650764665601461,
+      "recall": 0.8669263891736724,
+      "f1": 0.9133722186217326,
+      "support": 4877
+    },
+    "wildfire": {
+      "precision": 0.9225689404934688,
+      "recall": 0.953212866461723,
+      "f1": 0.9376405944610392,
+      "support": 13337
+    }
+  },
+  "test_per_class": {
+    "agricultural": {
+      "precision": 0.930194969188807,
+      "recall": 0.931323960756549,
+      "f1": 0.9307591226119478,
+      "support": 9887
+    },
+    "industrial": {
+      "precision": 0.930907415937356,
+      "recall": 0.8139347563431333,
+      "f1": 0.8685002148689299,
+      "support": 2483
+    },
+    "wildfire": {
+      "precision": 0.9367313570768465,
+      "recall": 0.9571438948209486,
+      "f1": 0.9468276208953079,
+      "support": 13767
+    }
+  },
+  "confusion_matrix": [
+    [
+      9822,
+      23,
+      789
+    ],
+    [
+      371,
+      4228,
+      278
+    ],
+    [
+      494,
+      130,
+      12713
+    ]
+  ],
+  "test_confusion_matrix": [
+    [
+      9208,
+      27,
+      652
+    ],
+    [
+      224,
+      2021,
+      238
+    ],
+    [
+      467,
+      123,
+      13177
+    ]
+  ],
+  "class_names": [
+    "agricultural",
+    "industrial",
+    "wildfire"
+  ],
+  "class_mapping": {
+    "agricultural": 0,
+    "industrial": 1,
+    "wildfire": 2
+  },
+  "feature_schema_path": "C:\\ProjectX\\SIH26162\\docs\\stage2d\\feature_schema.json",
+  "preprocessing_pipeline_path": "C:\\ProjectX\\SIH26162\\docs\\stage2d\\models\\preprocessing_pipeline.joblib",
+  "label_encoder_path": "C:\\ProjectX\\SIH26162\\docs\\stage2d\\models\\label_encoder.joblib",
+  "notes": "Final model trained on combined train+val data, evaluated on untouched test set. Feature set corrected per Stage 2D.5.1."
+}
