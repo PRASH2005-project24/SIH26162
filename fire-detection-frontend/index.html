@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Fire Intelligence | AI Powered Fire Detection
+    </title>
+
+
+    <!-- =========================
+         LEAFLET CSS
+    ========================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+
+    <!-- =========================
+         FONT AWESOME
+    ========================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+
+    <!-- =========================
+         YOUR CSS
+    ========================== -->
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+
+        <!-- NAVIGATION -->
+
+        <div class="sidebar-menu">
+
+
+            <a
+                class="menu-item active"
+                href="#"
+                data-view="dashboard"
+            >
+
+                <i class="fa-solid fa-grip"></i>
+
+                <span>
+                    Dashboard
+                </span>
+
+            </a>
+
+
+            <a
+                class="menu-item"
+                href="#"
+                data-view="settings"
+            >
+
+                <i class="fa-solid fa-gear"></i>
+
+                <span>
+                    Settings
+                </span>
+
+            </a>
+
+
+        </div>
+
+
+
+        <div class="divider"></div>
+
+
+
+        <!-- =====================================================
+             CLASSIFICATION OF FIRE
+        ====================================================== -->
+
+        <div class="fire-types">
+
+
+            <div class="fire-title">
+
+                <span>
+                    Classification of Fire
+                </span>
+
+                <i class="fa-solid fa-chevron-up"></i>
+
+            </div>
+
+
+            <div class="fire-type industrial" data-classification="industrial">
+
+                <i class="fa-solid fa-industry"></i>
+
+                <span>
+                    1. Industrial Fire
+                </span>
+
+            </div>
+
+
+            <div class="fire-type wildfire" data-classification="wildfire">
+
+                <i class="fa-solid fa-tree"></i>
+
+                <span>
+                    2. Wildfire / Natural Fire
+                </span>
+
+            </div>
+
+
+            <div class="fire-type agricultural" data-classification="agricultural">
+
+                <i class="fa-solid fa-wheat-awn"></i>
+
+                <span>
+                    3. Agricultural Fire
+                </span>
+
+            </div>
+
+
+            <div class="fire-type thermal" data-classification="thermal">
+
+                <i class="fa-solid fa-temperature-high"></i>
+
+                <span>
+                    4. Persistent Thermal Source
+                </span>
+
+            </div>
+
+
+            <div class="fire-type unknown" data-classification="unknown">
+
+                <i class="fa-solid fa-circle-question"></i>
+
+                <span>
+                    5. Unknown / Other
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+    </aside>
+
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="main">
+
+
+        <!-- =====================================================
+             TOP HEADER
+        ====================================================== -->
+
+        <header class="topbar">
+
+
+            <div class="date-box">
+
+                <i class="fa-regular fa-calendar"></i>
+
+
+                <div>
+
+                    <strong>
+                        24 Aug 2026
+                    </strong>
+
+                    <span>
+                        Monday 10:30 AM
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="header-actions">
+
+
+                <!-- FILTER BUTTON -->
+
+             
+
+                    <i class="fa-solid fa-filter"></i>
+
+                     <select
+    name="filter"
+    id="filter"
+    class="filter-select"
+    onchange="toggleFilterMenu(this.value)"
+>
+    <option value="" disabled selected>Filter</option>
+    <option value="today">Today</option>
+    <option value="24">24 hours ago</option>
+    <option value="week">1 week ago</option>
+</select>
+
+                </button>
+
+                <div class="filter-menu" id="filter-menu" style="display: none;">
+                    <div class="filter-option" data-filter="today">Today</div>
+                    <div class="filter-option" data-filter="24hours">24 hours ago</div>
+                    <div class="filter-option" data-filter="1week">1 week ago</div>
+                </div>
+
+
+
+                <!-- DARK / LIGHT MODE -->
+
+                <button
+                    class="theme-toggle"
+                    onclick="toggleTheme()"
+                >
+
+                    <i class="fa-solid fa-moon"></i>
+
+                    <span>
+                        Dark Mode
+                    </span>
+
+                </button>
+
+
+            </div>
+
+
+        </header>
+
+
+
+        <!-- =====================================================
+             PAGE CONTENT
+        ====================================================== -->
+
+        <div class="content" id="dashboard-view">
+
+
+            <!-- =================================================
+                 MAP + SELECTED DETECTION
+            ================================================== -->
+
+            <section class="map-layout">
+
+
+                <!-- ================= MAP ================= -->
+
+                <div class="map-card">
+
+
+                    <div id="map"></div>
+
+
+
+                    <!-- MAP CONTROLS -->
+
+                    <div class="map-controls">
+
+                        <button
+                            onclick="zoomIn()"
+                            title="Zoom In"
+                        >
+                            +
+                        </button>
+
+
+                        <button
+                            onclick="zoomOut()"
+                            title="Zoom Out"
+                        >
+                            −
+                        </button>
+
+
+                        <button
+                            onclick="resetMap()"
+                            title="Show India"
+                        >
+
+                            <i class="fa-solid fa-layer-group"></i>
+
+                        </button>
+
+                    </div>
+
+
+
+                    <!-- MAP LEGEND (Bottom Right) -->
+
+                    <div class="map-legend">
+
+
+                        <h3>
+                            Risk Level
+                        </h3>
+
+
+                        <div>
+
+                            <span class="legend-dot red"></span>
+
+                            High
+
+                        </div>
+
+
+                        <div>
+
+                            <span class="legend-dot orange"></span>
+
+                            Medium
+
+                        </div>
+
+
+                        <div>
+
+                            <span class="legend-dot green"></span>
+
+                            Low
+
+                        </div>
+
+
+                        <div>
+
+                            <span class="legend-dot cluster"></span>
+
+                            Cluster
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- ================= DETECTION ================= -->
+
+                <div class="detection-card">
+
+
+                    <div class="detection-header">
+
+                        <h2>
+                            Selected Detection
+                        </h2>
+
+                        <i
+                            class="fa-solid fa-xmark"
+                            onclick="resetDetection()"
+                        ></i>
+
+                    </div>
+
+
+
+                    <!-- LOCATION -->
+
+                    <div class="location">
+
+                        <i class="fa-solid fa-location-dot"></i>
+
+
+                        <div>
+
+                            <strong>
+                                Pune, Maharashtra, India
+                            </strong>
+
+                            <span>
+                                18.5204, 73.8567
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- RISK SCORE -->
+
+                    <div class="risk-score">
+
+
+                        <div>
+
+                            <span>
+                                RISK SCORE
+                            </span>
+
+
+                            <strong>
+
+                                87
+
+                                <small>
+                                    / 100
+                                </small>
+
+                            </strong>
+
+                        </div>
+
+
+
+                        <div class="critical">
+
+                            <b>
+                                CRITICAL
+                            </b>
+
+
+                            <div class="fire-circle">
+
+                                <i class="fa-solid fa-fire"></i>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- PREDICTION -->
+
+                    <div class="prediction">
+
+
+                        <div>
+
+                            <span>
+                                Prediction
+                            </span>
+
+                            <strong>
+                                Industrial Fire
+                            </strong>
+
+                        </div>
+
+
+                        <div class="confidence">
+
+                            <strong>
+                                91%
+                            </strong>
+
+                            <span>
+                                Confidence
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- KEY FACTORS -->
+
+                    <div class="factors">
+
+
+                        <h3>
+                            Key Factors
+                        </h3>
+
+
+                        <div class="factor">
+
+                            <span>
+
+                                <i class="fa-solid fa-temperature-high"></i>
+
+                                High Thermal Intensity (FRP)
+
+                            </span>
+
+                            <b>
+                                High
+                            </b>
+
+                        </div>
+
+
+
+                        <div class="factor">
+
+                            <span>
+
+                                <i class="fa-solid fa-industry"></i>
+
+                                Industrial Facility Nearby
+
+                            </span>
+
+                            <b>
+                                Yes
+                            </b>
+
+                        </div>
+
+
+
+                        <div class="factor">
+
+                            <span>
+
+                                <i class="fa-solid fa-layer-group"></i>
+
+                                Land Cover
+
+                            </span>
+
+                            <b>
+                                Built-up (87%)
+                            </b>
+
+                        </div>
+
+
+
+                        <div class="factor">
+
+                            <span>
+
+                                <i class="fa-solid fa-users"></i>
+
+                                Population Density
+
+                            </span>
+
+                            <b>
+                                High
+                            </b>
+
+                        </div>
+
+
+
+                        <div class="factor">
+
+                            <span>
+
+                                <i class="fa-solid fa-shield-halved"></i>
+
+                                Persistent Anomaly
+
+                            </span>
+
+                            <b>
+                                Yes
+                            </b>
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 LOWER DASHBOARD CARDS
+            ================================================== -->
+
+            <section class="bottom-grid">
+
+
+                <!-- QUICK SUMMARY -->
+
+                <div class="panel summary-panel">
+
+
+                    <h2>
+                        Quick Summary
+                    </h2>
+
+
+
+                    <div class="summary-item">
+
+
+                        <div class="summary-icon red-bg">
+
+                            <i class="fa-solid fa-fire"></i>
+
+                        </div>
+
+
+                        <div class="summary-text">
+
+                            <span>
+                                Total Detections
+                            </span>
+
+                            <small>
+                                High Risk
+                            </small>
+
+                            <strong>
+                                32
+                            </strong>
+
+                        </div>
+
+
+                        <b class="increase">
+                            ↑ 22%
+                        </b>
+
+
+                    </div>
+
+
+
+                    <div class="summary-item">
+
+
+                        <div class="summary-icon danger-bg">
+
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+
+                        </div>
+
+
+                        <div class="summary-text">
+
+                            <span>
+                                Industrial Areas
+                            </span>
+
+                            <small>
+                                Across India
+                            </small>
+
+                            <strong>
+                                14
+                            </strong>
+
+                        </div>
+
+
+                        <b class="increase">
+                            ↑ 2%
+                        </b>
+
+
+                    </div>
+
+
+
+                    <div class="summary-item">
+
+
+                        <div class="summary-icon orange-bg">
+
+                            <i class="fa-solid fa-temperature-high"></i>
+
+                        </div>
+
+
+                        <div class="summary-text">
+
+                            <span>
+                                Weather Risk
+                            </span>
+
+                            <small>
+                                High
+                            </small>
+
+                            <strong>
+                                61
+                            </strong>
+
+                        </div>
+
+
+                        <b>
+                            ↑ 20%
+                        </b>
+
+
+                    </div>
+
+
+
+                    <div class="summary-item">
+
+
+                        <div class="summary-icon green-bg">
+
+                            <i class="fa-solid fa-shield-heart"></i>
+
+                        </div>
+
+
+                        <div class="summary-text">
+
+                            <span>
+                                Low Risk
+                            </span>
+
+                            <small>
+                                Safe Areas
+                            </small>
+
+                            <strong>
+                                35
+                            </strong>
+
+                        </div>
+
+
+                        <b>
+                            1.4 km
+                        </b>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- LAND COVER -->
+
+                <div class="panel land-panel">
+
+
+                    <h2>
+
+                        Land Cover
+
+                        <span>
+                            (Dynamic World)
+                        </span>
+
+                    </h2>
+
+
+
+                    <div class="land-content">
+
+
+                        <div class="donut">
+
+                            <div>
+
+                                <strong>
+                                    87%
+                                </strong>
+
+                                <span>
+                                    Built
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="land-list">
+
+
+                            <div>
+
+                                <span class="land-color built"></span>
+
+                                Built
+
+                                <b>
+                                    87%
+                                </b>
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="land-color trees"></span>
+
+                                Trees
+
+                                <b>
+                                    4%
+                                </b>
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="land-color grass"></span>
+
+                                Grass
+
+                                <b>
+                                    3%
+                                </b>
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="land-color crops"></span>
+
+                                Crops
+
+                                <b>
+                                    3%
+                                </b>
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="land-color bare"></span>
+
+                                Bare
+
+                                <b>
+                                    2%
+                                </b>
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="land-color water"></span>
+
+                                Water
+
+                                <b>
+                                    1%
+                                </b>
+
+                            </div>
+
+
+                            <div>
+
+                                <span class="land-color other"></span>
+
+                                Others
+
+                                <b>
+                                    1%
+                                </b>
+
+                            </div>
+
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- SATELLITE IMAGE -->
+
+                <div class="panel satellite-panel">
+
+
+                    <h2>
+
+                        Satellite Image
+
+                        <span>
+                            (Sentinel-2)
+                        </span>
+
+                    </h2>
+
+
+
+                    <div class="satellite-image" id="satellite-image">
+
+
+                        <div class="sat-overlay">
+
+                            <i class="fa-solid fa-satellite"></i>
+
+                            Satellite Preview
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <div class="sat-footer">
+
+
+                        <span>
+                            Date: 24 Aug 2026
+                        </span>
+
+
+                        <span>
+
+                            <i class="fa-solid fa-cloud"></i>
+
+                            20%
+
+                        </span>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+        </div>
+
+
+        <!-- =====================================================
+             SETTINGS VIEW
+        ====================================================== -->
+
+        <div class="content" id="settings-view" style="display: none;">
+
+            <div class="page-heading">
+                <h1>Settings</h1>
+                <p>Configure application behavior and integrations</p>
+            </div>
+
+            <div class="settings-panel">
+
+                <!-- THEME SETTING -->
+                <div class="settings-group">
+                    <label>
+                        <span>Dark Mode</span>
+                        <input type="checkbox" id="theme-toggle" />
+                    </label>
+                </div>
+
+                <!-- DATA MODE SETTING -->
+                <div class="settings-group">
+                    <label>
+                        <span>Demo Mode (Uses Mock Data)</span>
+                        <input type="checkbox" id="data-mode-toggle" checked />
+                    </label>
+                    <small>When disabled, uses real API endpoints</small>
+                </div>
+
+                <!-- API CONFIGURATION -->
+                <div class="settings-group">
+                    <label for="api-base-url">
+                        <span>Primary API Base URL</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="api-base-url"
+                        placeholder="http://localhost:8000/api"
+                        value="http://localhost:8000/api"
+                    />
+                    <small>Stage 1/1B backend URL for events and enrichment</small>
+                </div>
+
+                <!-- ML SERVICE CONFIGURATION -->
+                <div class="settings-group">
+                    <label for="ml-service-url">
+                        <span>ML Service URL</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="ml-service-url"
+                        placeholder="http://localhost:5000/predict"
+                        value="http://localhost:5000/predict"
+                    />
+                    <small>Stage 2 ML prediction service URL</small>
+                </div>
+
+                <!-- ACTION BUTTONS -->
+                <div class="settings-actions">
+                    <button id="settings-save" class="btn-primary">Save Settings</button>
+                    <button id="settings-reset" class="btn-secondary">Reset to Defaults</button>
+                </div>
+
+                <!-- INFO SECTION -->
+                <div class="settings-info">
+                    <h3>Integration Information</h3>
+                    <p><strong>Demo Mode:</strong> When enabled, the dashboard uses mock data for demonstration. Disable to connect to real backend services.</p>
+                    <p><strong>Stage 1/1B Backend:</strong> Should provide endpoints at `/events`, `/events/{id}`, `/enrichment/{id}`, and `/statistics`.</p>
+                    <p><strong>Stage 2 ML Service:</strong> Should accept POST requests with event data and return predictions with `predicted_class`, `confidence`, `risk_score`, `risk_level`, and `key_factors`.</p>
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </main>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     LEAFLET JS
+====================================================== -->
+
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+></script>
+
+
+<!-- =====================================================
+     YOUR JAVASCRIPT (ES MODULE)
+====================================================== -->
+
+<script src="script.js" type="module"></script>
+
+
+</body>
+
+</html>
