@@ -1,0 +1,89 @@
+version: '3.9'
+
+services:
+  # PostgreSQL + PostGIS
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: sih26162-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sih26162_db}
+      POSTGRES_USER: ${POSTGRES_USER:-sih_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sih_password_dev_only}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-sih_user}:${POSTGRES_PASSWORD:-sih_password_dev_only}@postgres:5432/${POSTGRES_DB:-sih26162_db}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-sih_user}:${POSTGRES_PASSWORD:-sih_password_dev_only}@postgres:5432/${POSTGRES_DB:-sih26162_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Run migrations on startup
+      - ./infra/migrations/00_init_schema.sql:/docker-entrypoint-initdb.d/00_init_schema.sql
+      - ./infra/migrations/01_spatial_indexes.sql:/docker-entrypoint-initdb.d/01_spatial_indexes.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sih_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sih26162-net
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.backend
+    container_name: sih26162-backend
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-sih26162_db}
+      POSTGRES_USER: ${POSTGRES_USER:-sih_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sih_password_dev_only}
+      BACKEND_HOST: ${BACKEND_HOST:-0.0.0.0}
+      BACKEND_PORT: ${BACKEND_PORT:-8000}
+      BACKEND_ENV: ${BACKEND_ENV:-development}
+      FIRMS_MAP_KEY: ${FIRMS_MAP_KEY:-}
+      FIRMS_BBOX: ${FIRMS_BBOX:-17.35,73.50,19.00,75.50}
+      FIRMS_POLLING_INTERVAL_MINUTES: ${FIRMS_POLLING_INTERVAL_MINUTES:-30}
+      DEMO_MODE: ${DEMO_MODE:-false}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      STORAGE_LOCAL_PATH: /app/data/storage
+      OSM_CACHE_TTL_SECONDS: ${OSM_CACHE_TTL_SECONDS:-604800}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+      - ./infra/sample-data:/app/infra/sample-data:ro
+      - backend_storage:/app/data/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sih26162-net
+    command: python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # React Frontend (dev server)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sih26162-frontend
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000/api/v1
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app:cached
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - sih26162-net
+    command: npm run dev -- --host 0.0.0.0 --port 3000
+
+volumes:
+  postgres_data:
+  backend_storage:
+
+networks:
+  sih26162-net:
+    driver: bridge

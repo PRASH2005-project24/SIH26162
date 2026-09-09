@@ -1,0 +1,134 @@
+Rows: 673132
+Columns: 47
+Columns list: fire_id, latitude, longitude, bright_ti4, scan, track, acq_date, acq_time, satellite, instrument, confidence, version, bright_ti5, frp, daynight, source_satellite, source_file, acq_datetime, shapeName, shapeISO, shapeID, shapeGroup, shapeType, snpp_anomaly_flag, nearest_facility_latitude, nearest_facility_longitude, nearest_facility_name, nearest_facility_category, nearest_facility_distance_km, nearest_osm_id, facility_within_1km, facility_within_5km, facility_within_10km, dw_bare, dw_built, dw_confidence, dw_crops, dw_date, dw_difference, dw_flooded_vegetation, dw_found, dw_grass, dw_label, dw_shrub_and_scrub, dw_snow_and_ice, dw_trees, dw_water
+
+Missing values:
+                      column  missing_count  missing_percent
+                     fire_id              0         0.000000
+                    latitude              0         0.000000
+                   longitude              0         0.000000
+                  bright_ti4              0         0.000000
+                        scan              0         0.000000
+                       track              0         0.000000
+                    acq_date              0         0.000000
+                    acq_time              0         0.000000
+                   satellite              0         0.000000
+                  instrument              0         0.000000
+                  confidence              0         0.000000
+                     version              0         0.000000
+                  bright_ti5              0         0.000000
+                         frp              0         0.000000
+                    daynight              0         0.000000
+            source_satellite              0         0.000000
+                 source_file              0         0.000000
+                acq_datetime              0         0.000000
+                   shapeName              0         0.000000
+                    shapeISO              0         0.000000
+                     shapeID              0         0.000000
+                  shapeGroup              0         0.000000
+                   shapeType              0         0.000000
+           snpp_anomaly_flag              0         0.000000
+   nearest_facility_latitude              0         0.000000
+  nearest_facility_longitude              0         0.000000
+       nearest_facility_name         370057        54.975399
+   nearest_facility_category              0         0.000000
+nearest_facility_distance_km              0         0.000000
+              nearest_osm_id              0         0.000000
+         facility_within_1km              0         0.000000
+         facility_within_5km              0         0.000000
+        facility_within_10km              0         0.000000
+                     dw_bare          37800         5.615540
+                    dw_built          37800         5.615540
+               dw_confidence          37800         5.615540
+                    dw_crops          37800         5.615540
+                     dw_date          37800         5.615540
+               dw_difference          37800         5.615540
+       dw_flooded_vegetation          37800         5.615540
+                    dw_found              0         0.000000
+                    dw_grass          37800         5.615540
+                    dw_label          37800         5.615540
+          dw_shrub_and_scrub          37800         5.615540
+             dw_snow_and_ice          37800         5.615540
+                    dw_trees          37800         5.615540
+                    dw_water          37800         5.615540
+
+Numeric columns statistics:
+  fire_id: all NaN
+  latitude: min=8.1265, max=35.9915, mean=22.1454, count=673132
+  longitude: min=68.5377, max=97.1115, mean=80.6079, count=673132
+  bright_ti4: min=207.3800, max=367.0000, mean=331.1148, count=673132
+  scan: min=0.3200, max=0.8000, mean=0.4529, count=673132
+  track: min=0.3600, max=0.7800, mean=0.4716, count=673132
+  acq_date: all NaN
+  acq_time: min=537.0000, max=2203.0000, mean=1134.2855, count=673132
+  satellite: all NaN
+  instrument: all NaN
+  confidence: all NaN
+  version: all NaN
+  bright_ti5: min=248.9900, max=374.3700, mean=301.4157, count=673132
+  frp: min=0.0000, max=1333.9500, mean=6.6858, count=673132
+  daynight: all NaN
+  source_satellite: all NaN
+  source_file: all NaN
+  acq_datetime: all NaN
+  shapeName: all NaN
+  shapeISO: all NaN
+  shapeID: all NaN
+  shapeGroup: all NaN
+  shapeType: all NaN
+  snpp_anomaly_flag: min=0.0000, max=0.0000, mean=0.0000, count=673132
+  nearest_facility_latitude: min=8.1485, max=34.6506, mean=22.1465, count=673132
+  nearest_facility_longitude: min=68.5777, max=96.4922, mean=80.6068, count=673132
+  nearest_facility_name: all NaN
+  nearest_facility_category: all NaN
+  nearest_facility_distance_km: min=0.0015, max=150.5622, mean=13.6437, count=673132
+  nearest_osm_id: min=5908934.0000, max=14114670818.0000, mean=4311271672.1135, count=673132
+  facility_within_1km: min=0.0000, max=1.0000, mean=0.0583, count=673132
+  facility_within_5km: min=0.0000, max=1.0000, mean=0.2844, count=673132
+  facility_within_10km: min=0.0000, max=1.0000, mean=0.4854, count=673132
+  dw_bare: min=0.0167, max=0.6898, mean=0.1207, count=635332
+  dw_built: min=0.0131, max=0.8051, mean=0.0793, count=635332
+  dw_confidence: min=0.1479, max=0.8051, mean=0.5214, count=635332
+  dw_crops: min=0.0113, max=0.7556, mean=0.2204, count=635332
+  dw_date: all NaN
+  dw_difference: min=0.0007, max=12.2590, mean=6.3320, count=635332
+  dw_flooded_vegetation: min=0.0118, max=0.7103, mean=0.0394, count=635332
+  dw_found: min=0.0000, max=1.0000, mean=0.9438, count=673132
+  dw_grass: min=0.0115, max=0.6661, mean=0.0557, count=635332
+  dw_label: min=0.0000, max=8.0000, mean=3.8524, count=635332
+  dw_shrub_and_scrub: min=0.0142, max=0.6552, mean=0.1740, count=635332
+  dw_snow_and_ice: min=0.0134, max=0.7398, mean=0.0572, count=635332
+  dw_trees: min=0.0102, max=0.7855, mean=0.1951, count=635332
+  dw_water: min=0.0119, max=0.7705, mean=0.0579, count=635332
+
+Date range (acq_datetime): 2025-08-25 08:28:00 to 2026-08-24 08:09:00
+
+Geographic extent:
+  Latitude: 8.1265 to 35.9915
+  Longitude: 68.5377 to 97.1115
+
+Duplicate fire_id: 0
+Unique fire_id seen: 673132
+
+Duplicate spatiotemporal (lat,lon,time to minute): 2094
+Unique spatiotemporal points seen: 671038
+
+Unique values for specific categorical columns:
+  nearest_facility_category: 8 unique values
+    Top 5: [('fuel', 330134), ('power_plant', 213562), ('manufacturing', 99146), ('mining', 19401), ('steel_metal', 6957)]
+  dw_label: 9 unique values
+    Top 5: [('4.0', 206173), ('1.0', 163335), ('5.0', 112911), ('7.0', 72119), ('6.0', 43603)]
+  daynight: 2 unique values
+    Top 5: [('D', 473052), ('N', 200080)]
+  snpp_anomaly_flag: 1 unique values
+    Top 5: [('False', 673132)]
+  satellite: 2 unique values
+    Top 5: [('N21', 650956), ('N20', 22176)]
+  instrument: 1 unique values
+    Top 5: [('VIIRS', 673132)]
+
+Persistence analysis:
+  Number of unique locations: 582658
+  Observations per location: min=1, max=48, mean=1.16
+  Locations with >1 observation: 19461 (3.3%)
+  Locations with observations across multiple days: 16892 (2.9%)

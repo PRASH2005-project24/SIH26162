@@ -1,0 +1,1809 @@
+================================================================================
+  FIRE INTELLIGENCE DASHBOARD - EXPECTED OUTPUT GUIDE
+  What You Should See & How It Works (Current System - Stage 3)
+================================================================================
+
+Date Created: August 26, 2026
+Version: 1.0
+Status: Ready to Use
+Scope: Current demo system (mock data, 5 thermal events)
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+1. INITIAL PAGE LOAD - What You'll See
+2. USER INTERFACE BREAKDOWN - Each Component Explained
+3. INTERACTIVE ACTIONS - What Happens When You Click
+4. DATA FLOW - How Information Moves Through System
+5. STATE CHANGES - Different Views & Modes
+6. ERROR SCENARIOS - What If Something Goes Wrong
+7. PERFORMANCE EXPECTATIONS - Speed & Responsiveness
+8. BROWSER CONSOLE OUTPUT - Technical Information
+9. DEMO DATA SPECIFICS - Exact Values You'll See
+10. TESTING CHECKLIST - Verify Everything Works
+
+================================================================================
+1. INITIAL PAGE LOAD - What You'll See
+================================================================================
+
+### Time: 0-2 seconds (Page loads)
+
+STEP 1: Batch file runs
+└── Output: "Starting HTTP Server on port 8080"
+└── Browser tab opens or user types: http://localhost:8080/
+
+STEP 2: HTML loads (index.html)
+└── DOM structure renders
+└── Initial CSS styles applied
+└── JavaScript ES module loads (script.js)
+
+STEP 3: Page Visible (1-2 seconds)
+└── Full dashboard appears on screen
+└── No loading spinner (because demo data is instant)
+
+
+### EXACT VISUAL LAYOUT:
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│                                                                            │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │  🔥 Fire Intelligence | AI Powered Fire Detection                   │  │
+│  │                          📅 26 Aug 2026 | 10:53 AM  🌙 🔔 🔐       │  │
+│  └──────────────────────────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │ 🎯 DEMO MODE - Using mock data for demonstration                   │  │
+│  └──────────────────────────────────────────────────────────────────────┘  │
+│                                                                            │
+│  ┌────────────────┬──────────────────────────────────────────────────┐   │
+│  │                │                                                  │   │
+│  │  LEFT SIDEBAR  │           MAIN MAP AREA (Leaflet)              │   │
+│  │  (260px)       │           Centered on India                    │   │
+│  │                │                                                  │   │
+│  │ Dashboard ✓    │           🔴 (Pune)                            │   │
+│  │ ⚙️ Settings    │        🔴 (Satpura)                            │   │
+│  │                │                                                  │   │
+│  │ ═══════════    │                  🟢 (Moga)                    │   │
+│  │ Classifications│                                                  │   │
+│  │ 🏭 Industrial  │              🟠 (Jamshedpur)                   │   │
+│  │ 🌳 Wildfire    │                                                  │   │
+│  │ 🌾 Agricultural│        ⚫ (Rajasthan)                           │   │
+│  │ 🔥 Persistent  │                                                  │   │
+│  │ ❓ Unknown     │   [+] [-] [↗️] (Map controls)                  │   │
+│  │                │   Risk: 🔴 High 🟠 Medium 🟢 Low 🔵 Cluster   │   │
+│  │                │                                                  │   │
+│  └────────────────┼──────────────────────────────────────────────────┤   │
+│  │                │          RIGHT PANEL (Event Details)           │   │
+│  │ QUICK SUMMARY  │   ┌──────────────────────────────────────────┐ │   │
+│  │ Cards:         │   │ 📍 LOCATION                              │ │   │
+│  │ Total: 5 ↑22%  │   │ Pune, Maharashtra, India                 │ │   │
+│  │ Industrial: 2  │   │ 18.5204°N, 73.8567°E                     │ │   │
+│  │ High Risk: 2   │   │                                          │ │   │
+│  │ Low Risk: 2    │   │ 🔴 RISK SCORE: 87 / 100                 │ │   │
+│  │                │   │ Level: CRITICAL ⚠️                       │ │   │
+│  │ LAND COVER     │   │                                          │ │   │
+│  │ [Donut Chart]  │   │ 🤖 PREDICTION: Industrial Fire          │ │   │
+│  │ 87% Built      │   │ Confidence: 91% (HIGH)                  │ │   │
+│  │ 4% Trees       │   │                                          │ │   │
+│  │ 3% Grass       │   │ 📋 KEY FACTORS                           │ │   │
+│  │ 3% Crops       │   │ 🌡️  Thermal Intensity: High (74.2)      │ │   │
+│  │ 2% Bare        │   │ 🏭 Industrial Facility: MIDC (120m)      │ │   │
+│  │ 1% Water       │   │ 🗺️  Built-up Area: 87%                  │ │   │
+│  │ etc.           │   │ 👥 Population: High                      │ │   │
+│  │                │   │ 🛡️  Persistent: 5 days                  │ │   │
+│  │ SATELLITE      │   │ ┌──────────────────────────────────────┐ │ │   │
+│  │ [Demo Badge]   │   │ │ [Satellite Image Preview]            │ │ │   │
+│  │ Date: 24 Aug   │   │ │      [Orange DEMO badge]             │ │ │   │
+│  │ Cloud: 20%     │   │ └──────────────────────────────────────┘ │ │   │
+│  │                │   └──────────────────────────────────────────┘ │   │
+│  └────────────────┴──────────────────────────────────────────────────┘   │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+
+KEY FEATURES VISIBLE:
+✓ 5 colored markers on map (Red, Green, Orange, Gray)
+✓ Orange DEMO banner at very top
+✓ All left sidebar elements visible
+✓ Right panel showing first event (Pune) details
+✓ Land cover donut chart showing percentages
+✓ Satellite preview with DEMO badge
+✓ All styling (colors, fonts, spacing) applied
+
+
+================================================================================
+2. USER INTERFACE BREAKDOWN - Each Component Explained
+================================================================================
+
+### 2.1 TOP HEADER BAR (Yellow/Light background)
+
+┌────────────────────────────────────────────────────────────────────────┐
+│ 🔥 Fire Intelligence | AI Powered Fire Detection    📅 26 Aug 2026 | 10:53 AM  🌙 🔔 🔐 │
+└────────────────────────────────────────────────────────────────────────┘
+
+LEFT SIDE:
+- Fire icon 🔥 (orange/red color)
+- Text: "Fire Intelligence" (bold, dark color)
+- Divider: "|"
+- Text: "AI Powered Fire Detection" (gray, smaller)
+
+RIGHT SIDE:
+- Current date & time: "📅 26 Aug 2026 | 10:53 AM"
+  └─ Updates every second (live clock)
+- Dark mode toggle: 🌙 (click to enable dark mode)
+- Notification bell: 🔔 with number badge "5" (5 new events)
+  └─ Click to show notifications
+- Login button: 🔐 (currently shows login/account icon)
+  └─ Click to show user menu
+
+BACKGROUND COLOR: Light yellow (#fffbeb) or white
+TEXT COLOR: Dark (#1f2937)
+HEIGHT: ~60px
+
+
+### 2.2 DEMO MODE BANNER
+
+┌────────────────────────────────────────────────────────────────────────┐
+│ 🎯 DEMO MODE - Using mock data for demonstration                       │
+└────────────────────────────────────────────────────────────────────────┘
+
+PURPOSE: Clearly indicates this is not live production data
+BACKGROUND COLOR: Orange (#f97316)
+TEXT COLOR: White
+POSITION: Below header, above main content
+HEIGHT: ~40px
+ANIMATION: None (static, always visible in demo mode)
+HIDDEN WHEN: Demo mode disabled in Settings
+
+
+### 2.3 LEFT SIDEBAR (Navigation & Classification)
+
+WIDTH: 260px
+BACKGROUND: Light gray (#f3f4f6) or white
+PADDING: 20px
+
+SECTION 1: Navigation
+┌─────────────────────┐
+│ Dashboard ✓         │  (Dashboard is highlighted/active)
+│ ⚙️ Settings         │  (Settings is not highlighted)
+└─────────────────────┘
+ACTION: Click "Dashboard" → stays on current view
+        Click "Settings" → switches to Settings page
+
+SECTION 2: Fire Classifications (with divider line above)
+┌─────────────────────┐
+│ ═══════════════     │  (Divider line)
+│ Classifications:    │  (Heading)
+│                     │
+│ 🏭 Industrial Fire  │  (Red icon)
+│ 🌳 Wildfire/Natural │  (Green icon)
+│ 🌾 Agricultural     │  (Yellow icon)
+│ 🔥 Persistent Therm.│  (Orange icon)
+│ ❓ Unknown/Other    │  (Gray icon)
+└─────────────────────┘
+
+PURPOSE: Shows user what fire types can appear on dashboard
+COLOR CODING: Icons match marker colors on map
+INTERACTIVE: Text only (informational, not clickable)
+
+
+### 2.4 MAP AREA (Center)
+
+BACKGROUND: Light basemap (OpenStreetMap)
+LIBRARY: Leaflet.js
+CENTER POINT: India (latitude 22.9734, longitude 78.6569)
+ZOOM LEVEL: 5 (entire India visible)
+BORDERS: Gray lines showing country/state boundaries
+
+MARKERS (5 visible):
+
+1. PUNE MARKER
+   - Position: 18.5204°N, 73.8567°E
+   - Color: 🔴 RED (high risk)
+   - Size: Medium circle
+   - On hover: Popup shows "Pune, Maharashtra - Risk: 87/100"
+   - On click: Right panel updates to show Pune details
+
+2. SATPURA MARKER
+   - Position: 22.4646°N, 78.1122°E
+   - Color: 🔴 RED (high risk)
+   - Size: Medium circle
+   - On hover: Popup shows "Satpura Forest - Risk: 82/100"
+   - On click: Right panel updates
+
+3. MOGA MARKER
+   - Position: 31.1471°N, 75.3412°E
+   - Color: 🟢 GREEN (low risk)
+   - Size: Medium circle
+   - On hover: Popup shows "Moga, Punjab - Risk: 42/100"
+   - On click: Right panel updates
+
+4. JAMSHEDPUR MARKER
+   - Position: 22.8046°N, 86.2029°E
+   - Color: 🟠 ORANGE (medium risk)
+   - Size: Medium circle
+   - On hover: Popup shows "Jamshedpur - Risk: 68/100"
+   - On click: Right panel updates
+
+5. RAJASTHAN MARKER
+   - Position: 26.2389°N, 70.9624°E
+   - Color: ⚫ GRAY (low risk / unknown)
+   - Size: Medium circle
+   - On hover: Popup shows "Rajasthan - Risk: 31/100"
+   - On click: Right panel updates
+
+MAP CONTROLS (Top-right corner):
+
+┌─────────┐
+│  [+]    │  Zoom in button (when clicked, map zooms to level 6)
+│  [−]    │  Zoom out button (when clicked, map zooms to level 4)
+│  [↗️]    │  Reset to India view (when clicked, returns to center)
+└─────────┘
+
+LEGEND (Bottom-left corner):
+
+┌────────────────────┐
+│ 🔴 High (>75)      │
+│ 🟠 Medium (50-75)  │
+│ 🟢 Low (<50)       │
+│ 🔵 Cluster         │
+└────────────────────┘
+
+INTERACTION:
+- Click marker → triggers updateDetection() function → right panel updates
+- Hover marker → tooltip shows event info
+- Drag map → pans around (standard map behavior)
+- Scroll → zoom in/out (if enabled)
+
+
+### 2.5 RIGHT PANEL - SELECTED DETECTION (Event Details)
+
+WIDTH: ~450px
+BACKGROUND: White (#ffffff)
+BORDER: Light gray border left side
+PADDING: 20px
+SHADOW: Slight shadow for depth
+
+HEADER:
+📍 LOCATION
+
+LOCATION DETAILS:
+Pune, Maharashtra, India
+18.5204°N, 73.8567°E
+
+TEXT COLOR: Dark gray (#4b5563)
+FONT SIZE: Smaller, data-like
+
+
+RISK SCORE SECTION:
+┌──────────────────────────┐
+│ 🔴 RISK SCORE: 87 / 100  │
+│ Level: CRITICAL ⚠️       │
+└──────────────────────────┘
+
+NUMBER: Large (48px font)
+CIRCLE BACKGROUND: Red (#ef4444) for critical
+LABEL: "CRITICAL" in red
+ICON: Warning triangle ⚠️
+
+
+PREDICTION SECTION:
+┌──────────────────────────┐
+│ 🤖 PREDICTION            │
+│ Industrial Fire          │
+│ Confidence: 91% ✓        │
+└──────────────────────────┘
+
+PREDICTED CLASS: Large text (22px)
+CONFIDENCE: Percentage with green checkmark (high confidence)
+CONFIDENCE COLOR:
+  - Green (#22c55e) if > 80%
+  - Yellow (#eab308) if 50-80%
+  - Red (#ef4444) if < 50%
+
+
+KEY FACTORS SECTION:
+┌──────────────────────────┐
+│ 📋 KEY FACTORS           │
+│ 🌡️  Thermal Intensity    │
+│    High (74.2)           │
+│ 🏭 Industrial Facility   │
+│    MIDC Hub (120m)       │
+│ 🗺️  Land Cover           │
+│    Built (87%)           │
+│ 👥 Population Density    │
+│    High                  │
+│ 🛡️  Persistent Anomaly   │
+│    Yes (5 days)          │
+└──────────────────────────┘
+
+Each factor has:
+- Icon (emoji)
+- Label (name)
+- Value (data)
+- Supporting detail
+
+
+LAND COVER CHART (Bottom left section):
+┌──────────────────────────┐
+│ DYNAMIC WORLD            │
+│ ┌────────────────────┐   │
+│ │   [Donut Chart]    │   │
+│ │     87% Built      │   │
+│ │   (center text)    │   │
+│ └────────────────────┘   │
+│                          │
+│ Built:     87%  █████    │
+│ Trees:      4%  ██       │
+│ Grass:      3%  █        │
+│ Crops:      3%  █        │
+│ Bare:       2%  █        │
+│ Water:      1%  █        │
+│ Others:     1%  █        │
+└──────────────────────────┘
+
+DONUT CHART:
+- Center circle: White/transparent
+- Ring: Colored segments (conic-gradient CSS)
+- Center label: "87% Built" (largest category)
+- Colors match Dynamic World class colors:
+  - Built: Red (#ef4444)
+  - Trees: Green (#22c55e)
+  - Grass: Lime (#84cc16)
+  - Crops: Yellow (#eab308)
+  - Bare: Tan (#d6b48a)
+  - Water: Blue (#3b82f6)
+  - Shrub: Brown (#a16207)
+  - Flooded: Teal (#06b6d4)
+  - Snow: Gray (#e2e8f0)
+
+LEGEND BELOW:
+- Shows all 9 classes with percentages
+- Clickable (optional: show/hide classes)
+
+
+SATELLITE PREVIEW (Bottom right section):
+┌──────────────────────────────────┐
+│ Satellite Image (Sentinel-2)     │
+├──────────────────────────────────┤
+│  ┌────────────────────────────┐  │
+│  │   [DEMO] [Image Placeholder]  │  (Image or gradient)
+│  │        or actual preview       │
+│  └────────────────────────────┘  │
+├──────────────────────────────────┤
+│ 📅 Date: 24 Aug 2026             │
+│ ☁️  Cloud Cover: 20%             │
+│ 📡 Satellite: Sentinel-2         │
+└──────────────────────────────────┘
+
+DEMO BADGE: Orange label showing "DEMO"
+IMAGE: Placeholder gradient or actual satellite image
+METADATA: Date, cloud percentage, satellite name
+
+INTERACTION: Click image → (optional) opens in larger view
+
+
+### 2.6 BOTTOM SECTION - SUMMARY CARDS
+
+LAYOUT: 3-column grid (on desktop)
+
+┌─────────────┬─────────────┬─────────────┐
+│   CARD 1    │   CARD 2    │   CARD 3    │
+│  TOTAL      │  INDUSTRIAL │   WEATHER   │
+│  DETECTIONS │   AREAS     │    RISK     │
+├─────────────┼─────────────┼─────────────┤
+│   CARD 4    │
+│   LOW RISK  │
+└─────────────┘
+
+CARD 1: TOTAL DETECTIONS
+┌──────────────────────┐
+│ 📊 Total Detections  │
+│                      │
+│       5              │  (Large number)
+│                      │
+│ High Risk ↑ 22%      │  (Trend indicator)
+│ Last 24 hours        │
+└──────────────────────┘
+
+TEXT: "5 High Risk ↑ 22%"
+MEANING: 5 events detected, trend up 22% from yesterday
+BACKGROUND: Light blue
+
+CARD 2: INDUSTRIAL AREAS
+┌──────────────────────┐
+│ 🏭 Industrial Areas  │
+│                      │
+│       2              │  (Large number)
+│                      │
+│ Across India ↑ 2%    │
+│ Last 30 days         │
+└──────────────────────┘
+
+TEXT: "2 Across India ↑ 2%"
+BACKGROUND: Light yellow
+
+CARD 3: WEATHER RISK
+┌──────────────────────┐
+│ 🌤️  Weather Risk     │
+│                      │
+│       2              │
+│                      │
+│ High ↑ 20%           │
+│ Last update: 5 min   │
+└──────────────────────┘
+
+TEXT: "2 High ↑ 20%"
+BACKGROUND: Light orange
+
+CARD 4: LOW RISK
+┌──────────────────────┐
+│ 🟢 Low Risk          │
+│                      │
+│       2              │
+│                      │
+│ Safe Areas           │
+│ Being Monitored      │
+└──────────────────────┘
+
+TEXT: "2 Safe Areas"
+BACKGROUND: Light green
+
+ALL CARDS:
+- Rounded corners (12px)
+- Padding: 15px
+- Font: Bold numbers (32px), smaller labels (12px)
+- Shadow: Subtle shadow below
+- Hover: Slight background darken
+
+
+================================================================================
+3. INTERACTIVE ACTIONS - What Happens When You Click
+================================================================================
+
+### ACTION 1: CLICK MARKER ON MAP
+
+USER CLICK: Click on any of the 5 markers
+
+IMMEDIATE RESPONSE (< 50ms):
+1. Marker changes slightly (becomes slightly larger or lighter)
+2. Map scrolls/pans to center on that marker
+3. Right panel data updates instantly
+
+RIGHT PANEL UPDATES:
+- Location: Shows new location (city, state, coordinates)
+- Risk Score: Updates to new event's risk score
+- Prediction: Shows new event's predicted classification
+- Key Factors: Updates to new event's factors
+- Land Cover: Donut chart regenerated for new event
+- Satellite: Shows new event's satellite preview
+
+EXAMPLE - CLICKING SATPURA MARKER:
+BEFORE: Right panel shows Pune (87/100, Industrial Fire)
+AFTER: Right panel shows Satpura (82/100, Wildfire)
+- Location: Satpura Forest Range, Madhya Pradesh
+- Risk Score: 82/100 - HIGH (🔴 RED)
+- Prediction: Wildfire / Natural Fire
+- Confidence: 88%
+- Key Factors: FRP 142.5 (higher), Forest land cover, Denwa River nearby
+- Land cover: Trees 78%, Shrub 12%, Grass 6%
+- Satellite: Updated image and metadata
+
+
+### ACTION 2: CLICK DARK MODE BUTTON (🌙)
+
+USER CLICK: Click moon icon (🌙) in top-right header
+
+IMMEDIATE RESPONSE (< 100ms):
+1. Entire page background turns dark
+2. All text becomes light/white
+3. All cards get dark background
+4. Map overlay becomes darker
+5. Button changes to sun icon ☀️
+
+COLORS CHANGE:
+- Background: White (#ffffff) → Dark (#1f2937)
+- Text: Dark (#1f2937) → White (#f3f4f6)
+- Cards: White → Dark gray (#374151)
+- Borders: Light gray → Dark gray
+- Map tiles: Lighter → Darker
+
+ON PAGE REFRESH:
+- Dark mode persists (stored in localStorage)
+- Page loads directly in dark mode if previously enabled
+
+EXAMPLE VISUAL:
+LIGHT MODE:
+┌────────────────────────────────┐
+│ White background               │
+│ Dark text                      │
+│ Light cards                    │
+│ 🌙 Dark mode button            │
+└────────────────────────────────┘
+
+DARK MODE:
+┌────────────────────────────────┐
+│ Dark background                │
+│ Light text                     │
+│ Dark cards                     │
+│ ☀️  Light mode button          │
+└────────────────────────────────┘
+
+
+### ACTION 3: CLICK SETTINGS IN SIDEBAR
+
+USER CLICK: Click "⚙️ Settings" in left sidebar
+
+IMMEDIATE RESPONSE (< 100ms):
+1. Dashboard view hidden
+2. Settings page appears
+3. Sidebar shows "Settings" highlighted instead of "Dashboard"
+
+SETTINGS PAGE LAYOUT:
+┌─────────────────────────────────────────┐
+│ ⚙️ SETTINGS & CONFIGURATION              │
+│                                         │
+│ Theme Settings                          │
+│ ┌─────────────────────────────────────┐ │
+│ │ □ Dark Mode                         │ │
+│ │   Enable dark theme for dashboard   │ │
+│ └─────────────────────────────────────┘ │
+│                                         │
+│ Data Mode                               │
+│ ┌─────────────────────────────────────┐ │
+│ │ ☑️ Demo Mode (ENABLED)              │ │
+│ │   Using mock data                   │ │
+│ │   (Uncheck when real API ready)     │ │
+│ └─────────────────────────────────────┘ │
+│                                         │
+│ API Configuration                       │
+│ ┌─────────────────────────────────────┐ │
+│ │ API Base URL:                       │ │
+│ │ http://localhost:8000/api           │ │
+│ │                                     │ │
+│ │ ML Service URL:                     │ │
+│ │ http://localhost:5000/predict       │ │
+│ └─────────────────────────────────────┘ │
+│                                         │
+│ Integration Information                 │
+│ ┌─────────────────────────────────────┐ │
+│ │ When ready to integrate:            │ │
+│ │ 1. Get backend API URL from team    │ │
+│ │ 2. Enter it in "API Base URL"       │ │
+│ │ 3. Uncheck "Demo Mode"              │ │
+│ │ 4. Click "Save Settings"            │ │
+│ │                                     │ │
+│ │ Similarly for ML Service URL        │ │
+│ └─────────────────────────────────────┘ │
+│                                         │
+│ [💾 Save Settings] [🔄 Reset to Default]│
+└─────────────────────────────────────────┘
+
+SETTINGS SECTIONS:
+
+1. THEME SETTINGS
+   - Checkbox: "Dark Mode"
+   - Currently: Unchecked (or checked, matches current theme)
+
+2. DATA MODE
+   - Checkbox: "Demo Mode"
+   - Currently: CHECKED (because we're in demo)
+   - When unchecked: System will try to fetch from real API
+
+3. API CONFIGURATION
+   - Text input: "API Base URL"
+     Default: http://localhost:8000/api
+     User can change to: http://your-backend.com/api
+
+   - Text input: "ML Service URL"
+     Default: http://localhost:5000/predict
+     User can change to: http://your-ml-service.com/predict
+
+4. INTEGRATION INFORMATION
+   - Help text explaining how to connect real backends
+   - Read-only section (informational)
+
+ACTION BUTTONS:
+- Save Settings button → Saves all changes to localStorage
+  └─ Shows toast: "✓ Settings saved successfully"
+- Reset to Default button → Reverts all changes
+  └─ Shows confirmation: "Reset to default settings?"
+
+
+### ACTION 4: CLICK "SAVE SETTINGS"
+
+USER CLICK: Click [Save Settings] button
+
+IMMEDIATE RESPONSE (< 50ms):
+1. All field values captured
+2. Saved to browser's localStorage
+3. Toast notification appears (top-right)
+4. Notification disappears after 3 seconds
+
+TOAST NOTIFICATION:
+┌─────────────────────────────┐
+│ ✓ Settings saved successfully│
+│ (in green)                  │
+└─────────────────────────────┘
+
+WHAT GETS SAVED:
+- Dark Mode: true/false
+- Demo Mode: true/false
+- API Base URL: new URL
+- ML Service URL: new URL
+
+ON NEXT PAGE RELOAD:
+- All settings restored from localStorage
+- App starts with saved configuration
+
+
+### ACTION 5: CLICK "RESET TO DEFAULT"
+
+USER CLICK: Click [Reset to Default] button
+
+RESPONSE:
+1. Confirmation dialog appears:
+   "Reset all settings to default values?"
+   [Cancel] [Reset]
+
+2. If user clicks Cancel → Dialog closes, settings unchanged
+
+3. If user clicks Reset:
+   - All fields reset to default values
+   - localStorage cleared
+   - Toast: "✓ Settings reset to defaults"
+
+
+### ACTION 6: CLICK "DASHBOARD" IN SIDEBAR
+
+USER CLICK: Click "Dashboard" in left sidebar (from Settings)
+
+IMMEDIATE RESPONSE (< 100ms):
+1. Settings view hidden
+2. Dashboard view appears
+3. Sidebar shows "Dashboard" highlighted
+4. All data from before is preserved (still shows same event selected)
+
+PRESERVES:
+- Selected event (same event still showing in right panel)
+- Theme (stays dark if dark mode was enabled)
+- All user actions (no data lost)
+
+
+### ACTION 7: CLICK MAP ZOOM BUTTONS
+
+USER CLICK: Click [+] button (zoom in)
+
+IMMEDIATE RESPONSE (< 200ms):
+1. Map zooms in one level
+2. Markers become larger
+3. Text on map becomes more readable
+4. Map recenters automatically
+
+ZOOM LEVELS:
+- Start: Level 5 (entire India)
+- Click [+] → Level 6 (larger region visible)
+- Click [+] again → Level 7 (even closer)
+- Click [−] → Level 4 (further out)
+
+MAP RESET:
+- Click [↗️] button → Returns to original view
+  - Zoom: Level 5
+  - Center: India (22.9734, 78.6569)
+  - All markers visible again
+
+
+================================================================================
+4. DATA FLOW - How Information Moves Through System
+================================================================================
+
+### INITIALIZATION FLOW (Page Load)
+
+Step 1: Browser loads http://localhost:8080
+└─ HTML parsed (index.html)
+
+Step 2: CSS loaded (style.css)
+└─ All styles applied to page
+
+Step 3: JavaScript loads as ES Module (script.js type="module")
+└─ Imports start executing
+
+Step 4: Services imported
+└─ src/config.js loaded → Configuration initialized
+└─ src/adapters/mockAdapter.js loaded → Mock data ready
+└─ src/adapters/apiAdapter.js loaded → API adapter ready
+└─ src/services/eventsService.js → Event fetching ready
+└─ src/services/predictionService.js → ML prediction ready
+└─ src/services/statisticsService.js → Stats ready
+└─ src/services/satelliteService.js → Satellite data ready
+
+Step 5: Main script initialization
+└─ Initialize map (Leaflet)
+└─ Load events: const events = await eventsService.getEvents()
+└─ Create markers for each event
+└─ Select first event (Pune) by default
+└─ Update right panel with Pune details
+└─ Render land cover chart for Pune
+└─ Fetch and display satellite data for Pune
+└─ Load statistics (5 events, 2 industrial, 2 high risk, etc.)
+
+Step 6: Page fully interactive
+└─ All buttons, clicks, interactions work
+└─ Real-time clock starts updating
+
+
+### EVENT SELECTION FLOW (User clicks marker)
+
+Step 1: User clicks marker on map
+└─ JavaScript event listener triggered: map.on('click', marker)
+
+Step 2: Marker data extracted
+└─ event = fireDetections[markerIndex]
+└─ Get: event_id, location, risk_score, coordinates, classification
+
+Step 3: Fetch enrichment data
+└─ const enrichment = await enrichmentService.getEnrichment(event_id)
+└─ Get: land_cover, industrial_context, water_context, population
+
+Step 4: Fetch prediction data
+└─ const prediction = await predictionService.getPrediction(event_id)
+└─ Get: predicted_class, confidence, key_factors
+
+Step 5: Fetch satellite data
+└─ const satellite = await satelliteService.getSatelliteData(event_id)
+└─ Get: image_url, acquisition_date, cloud_cover
+
+Step 6: Update UI
+└─ Update location text
+└─ Update risk score display
+└─ Update prediction display
+└─ Update key factors list
+└─ Regenerate land cover chart
+└─ Update satellite preview
+└─ Center map on selected marker
+
+Step 7: All updates complete
+└─ User sees new data in right panel
+└─ No errors in browser console
+
+
+### THEME TOGGLE FLOW (User clicks dark mode)
+
+Step 1: User clicks 🌙 button
+└─ JavaScript event listener: toggleButton.onclick = toggleTheme()
+
+Step 2: Get current theme
+└─ currentTheme = localStorage.getItem('theme') || 'light'
+
+Step 3: Toggle theme
+└─ if (currentTheme === 'light') → newTheme = 'dark'
+└─ else → newTheme = 'light'
+
+Step 4: Apply theme
+└─ document.body.classList.add('dark-mode') OR remove it
+└─ All CSS with dark-mode selector updates
+
+Step 5: Save theme
+└─ localStorage.setItem('theme', newTheme)
+
+Step 6: Update button icon
+└─ If now dark → icon = ☀️
+└─ If now light → icon = 🌙
+
+Step 7: All changes applied
+└─ Page is now dark or light
+└─ Will persist on next reload
+
+
+### SETTINGS SAVE FLOW (User saves configuration)
+
+Step 1: User fills in fields and clicks Save
+└─ API Base URL: "http://new-url.com/api"
+└─ ML Service URL: "http://new-ml.com"
+
+Step 2: Collect values
+└─ const settings = {
+└─   apiBaseUrl: inputAPIUrl.value,
+└─   mlServiceUrl: inputMLUrl.value,
+└─   isDemoMode: demoModeCheckbox.checked,
+└─   theme: themeCheckbox.checked ? 'dark' : 'light'
+└─ }
+
+Step 3: Validate (basic checks)
+└─ Check if URLs are not empty
+└─ Show error if invalid
+
+Step 4: Save to localStorage
+└─ localStorage.setItem('config', JSON.stringify(settings))
+
+Step 5: Update in-memory config
+└─ config.apiBaseUrl = settings.apiBaseUrl
+└─ config.mlServiceUrl = settings.mlServiceUrl
+└─ etc.
+
+Step 6: Show success message
+└─ Toast notification: "✓ Settings saved successfully"
+
+Step 7: Next load
+└─ Settings restored from localStorage
+└─ Persisted across browser restarts
+
+
+================================================================================
+5. STATE CHANGES - Different Views & Modes
+================================================================================
+
+### STATE 1: INITIAL LOAD (Demo Mode)
+
+WHAT USER SEES:
+✓ Dashboard visible
+✓ 5 markers on map
+✓ Pune selected (right panel shows Pune data)
+✓ Demo mode banner visible
+✓ All statistics showing
+
+WHAT'S WORKING:
+✓ Map interactive
+✓ Markers clickable
+✓ Settings accessible
+✓ Dark mode available
+✓ Theme persists
+
+CONSOLE OUTPUT:
+[DEMO] Loaded 5 mock events
+[DEMO] Loaded mock prediction for evt_pune_001
+[DEMO] Loaded mock satellite data for evt_pune_001
+(repeats for other events)
+
+
+### STATE 2: DIFFERENT EVENT SELECTED
+
+USER CLICKED: Satpura marker
+
+VISIBLE CHANGES:
+- Location changes to "Satpura Forest Range, Madhya Pradesh"
+- Risk score changes to "82 / 100" (down from 87)
+- Risk level changes to "HIGH" (still red, but different severity)
+- Prediction changes to "Wildfire / Natural Fire"
+- Confidence changes to "88%"
+- Key factors completely different:
+  └─ FRP now 142.5 (very high thermal intensity)
+  └─ No industrial facility (forest area)
+  └─ Land cover: Trees 78%, Shrub 12%
+  └─ Population density: Low or none
+- Land cover chart regenerated:
+  └─ Donut shows large green segment (trees)
+  └─ Legend shows trees 78%, shrub 12%, grass 6%
+- Satellite data updated:
+  └─ Different image preview
+  └─ Different date (25 Aug instead of 24 Aug)
+  └─ Lower cloud cover (5% instead of 20%)
+- Map recenters on Satpura location
+
+STATISTICS UNCHANGED:
+- Still shows "5 High Risk" (because statistics are global, not event-specific)
+
+
+### STATE 3: DARK MODE ENABLED
+
+USER CLICKED: 🌙 button
+
+IMMEDIATE VISUAL CHANGES:
+- Page background: White → Dark gray/black
+- Text: Dark → White/light gray
+- Cards: White → Dark gray
+- Sidebar: Light gray → Dark gray
+- Map overlay: Gets darker tint
+- All icons remain same color
+- Input fields: White → Dark with light text
+- Buttons: Keep same styling but slightly darker
+
+AFTER RELOAD:
+- Page loads in dark mode by default
+- Settings page shows "Dark Mode" checkbox as CHECKED
+- User can toggle back to light mode
+
+PRESERVED:
+- Selected event (still shows same event)
+- All data (no data loss)
+- Functionality (everything still works)
+
+
+### STATE 4: SETTINGS PAGE OPEN
+
+USER CLICKED: ⚙️ Settings in sidebar
+
+VISIBLE CHANGES:
+- Dashboard view completely hidden
+- Settings view appears
+- Sidebar shows "Settings" highlighted (instead of "Dashboard")
+- New form visible with:
+  └─ Dark Mode checkbox (shows current state)
+  └─ Demo Mode checkbox (CHECKED, enabled)
+  └─ API Base URL input field (default value visible)
+  └─ ML Service URL input field (default value visible)
+  └─ Save Settings button
+  └─ Reset to Default button
+  └─ Integration information section
+
+DATA PRESERVED:
+- All previous settings/data still in memory
+- Can click Dashboard to return without losing anything
+
+
+### STATE 5: DEMO MODE DISABLED (After saving settings)
+
+USER ACTION: Unchecked "Demo Mode" checkbox and saved
+
+NEXT BEHAVIOR:
+- System will try to fetch from real API
+- If API not available:
+  └─ Error message appears in browser console
+  └─ Fallback: May show "No events available" or error state
+  └─ Map appears empty or with error message
+
+WHAT CHANGES:
+- Demo banner disappears (real data, not demo)
+- eventsService.getEvents() calls apiAdapter instead of mockAdapter
+- If API fails, error handling prevents app from crashing
+- User can re-enable Demo Mode to go back to mock data
+
+
+### STATE 6: LOADING STATE (If fetching from API)
+
+USER ACTION: Saved API URL and enabled demo disabled
+
+VISUAL INDICATORS:
+- Right panel might show loading spinner (skeleton loader)
+- Donut chart might show placeholder
+- Satellite preview might show placeholder
+- Map markers load normally (cached from previous load)
+
+DURATION: 1-3 seconds (depending on API response time)
+
+OUTCOME:
+- Data loads successfully OR
+- Error message appears explaining why it failed
+
+
+================================================================================
+6. ERROR SCENARIOS - What If Something Goes Wrong
+================================================================================
+
+### ERROR 1: PYTHON NOT RUNNING (Batch file issues)
+
+USER ACTION: Double-clicks run_stage3_demo.bat
+
+BATCH OUTPUT:
+[ERROR] Python is not installed or not in PATH
+Please install Python from: https://www.python.org/downloads/
+Make sure to check "Add Python to PATH" during installation
+
+USER SEES: Batch window closes or shows this error
+
+SOLUTION STEPS:
+1. Install Python from python.org
+2. During installation, CHECK "Add Python to PATH"
+3. Restart command prompt
+4. Try batch file again
+
+
+### ERROR 2: PORT 8080 ALREADY IN USE
+
+USER ACTION: Double-clicks run_stage3_demo.bat
+
+BATCH OUTPUT:
+[WARNING] Port 8080 is already in use
+Enter alternative port (default 8000): _
+
+USER ACTION: Types "8000" and presses Enter
+
+THEN:
+- Server starts on http://localhost:8000/
+- Batch shows: "Local URL: http://localhost:8000/"
+- User opens that URL in browser
+
+
+### ERROR 3: FILE NOT FOUND
+
+USER ACTION: Runs batch file from wrong directory
+
+BATCH OUTPUT:
+[ERROR] index.html not found in current directory
+Please run this batch file from the project root directory
+
+SOLUTION:
+1. Extract ZIP to folder
+2. Navigate to that folder
+3. Run batch file from that location (where index.html is)
+
+
+### ERROR 4: JAVASCRIPT ERROR (Browser console)
+
+USER ACTION: Loads page, something breaks
+
+BROWSER CONSOLE (F12 → Console tab):
+Uncaught TypeError: Cannot read property 'getEvents' of undefined
+    at script.js:45
+
+MEANING: Service import failed
+
+SOLUTION:
+1. Check browser console for red error messages
+2. Verify all files exist in src/ folder
+3. Try hard refresh (Ctrl+Shift+R)
+4. Try different browser
+
+
+### ERROR 5: MAP NOT SHOWING
+
+USER ACTION: Page loads but map is blank/gray
+
+POSSIBLE CAUSES:
+- Network issue (can't load OSM tiles)
+- Leaflet not loaded
+- No markers created
+
+CHECK:
+1. Open browser console (F12)
+2. Look for errors
+3. Try hard refresh (Ctrl+Shift+R)
+4. Check internet connection
+5. Try different browser or incognito mode
+
+
+### ERROR 6: DARK MODE NOT PERSISTING
+
+USER ACTION: Enables dark mode, closes browser, reopens, still light
+
+CAUSE: localStorage disabled or blocked
+
+SOLUTION:
+1. Check browser settings (privacy)
+2. Allow localStorage for localhost
+3. Try different browser
+4. Try incognito mode
+
+
+### ERROR 7: SETTINGS NOT SAVING
+
+USER ACTION: Fills in API URL, clicks Save, goes back to Settings, URL is gone
+
+CAUSE: localStorage not working or not implementing save properly
+
+SOLUTION:
+1. Open browser console (F12)
+2. Type: localStorage.getItem('config')
+3. If returns null, localStorage is not working
+4. Try different browser
+5. Check browser permissions
+
+
+### ERROR 8: CANNOT CONNECT TO REAL API (When demo mode disabled)
+
+USER ACTION: Disabled demo mode, API is not running
+
+APP STATE:
+- Map shows (no error)
+- Right panel shows error or empty state
+- No markers appear
+- Console shows: Failed to fetch from http://your-api.com
+
+MEANING: System tried real API and it failed, fell back gracefully
+
+SOLUTION:
+1. Start your real API server
+2. Make sure URL is correct
+3. Enable demo mode again if needed
+4. Or keep watching for API to start
+
+
+================================================================================
+7. PERFORMANCE EXPECTATIONS - Speed & Responsiveness
+================================================================================
+
+### TIMING METRICS
+
+ACTION                          EXPECTED TIME      ACTUAL (Current System)
+─────────────────────────────────────────────────────────────────────────
+
+Page load (first visit)         < 2 seconds        ~1-2 seconds
+Page load (cached)              < 1 second         ~0.5-1 seconds
+Click marker                    < 300ms            ~100-200ms
+Donut chart redraw              < 200ms            ~50-100ms
+Dark mode toggle                < 100ms            ~50ms
+Switch to Settings              < 100ms            ~50ms
+Save settings                   < 100ms            ~50ms
+Drag map                        Smooth             Very smooth
+Zoom map                        Instant            Instant
+Date/time update (per second)   Every 1000ms       Every 1000ms
+
+EXPLANATION:
+- "Expected time" = what production systems target
+- "Actual" = what you should see with mock data on modern computer
+- All times are milliseconds (1000ms = 1 second)
+
+
+### RESOURCE USAGE (Browser Memory)
+
+METRIC              TYPICAL VALUE
+────────────────────────────────
+
+Page Load Memory    ~5-10 MB
+Runtime Memory      ~15-25 MB
+Memory (Dark Mode)  ~25-30 MB (slightly more)
+
+MEANING: Very light on browser resources, no memory leaks
+
+
+### NETWORK USAGE
+
+METRIC              TYPICAL VALUE
+────────────────────────────────
+
+Initial Load        ~500 KB
+  - HTML: ~50 KB
+  - CSS: ~150 KB
+  - JavaScript: ~300 KB
+
+Runtime Transfers   ~0 KB (mock data is local)
+                    (real API would transfer ~10-50 KB per request)
+
+MEANING: Demo mode uses zero network after page loads (all data local)
+
+
+### RESPONSIVENESS
+
+FEEL METRIC         CURRENT SYSTEM
+────────────────────────────────
+
+Map panning         Smooth, no lag
+Marker clicking     Instant response
+UI transitions      Smooth (no jank)
+Scrolling           Smooth
+Input fields        Responsive (no delay)
+
+MEANING: Very smooth user experience, no performance issues
+
+
+================================================================================
+8. BROWSER CONSOLE OUTPUT - Technical Information
+================================================================================
+
+### WHAT TO EXPECT IN BROWSER CONSOLE
+
+Open: Press F12 (or Ctrl+Shift+I)
+Click: Console tab
+
+CONSOLE MESSAGES (Demo Mode):
+
+When page loads, you'll see:
+
+┌─────────────────────────────────────────────────────┐
+│ [DEMO] Loaded 5 mock events                         │
+│ [DEMO] Loaded mock prediction for evt_pune_001      │
+│ [DEMO] Loaded mock satellite data for evt_pune_001  │
+│ [DEMO] Loaded mock enrichment for evt_pune_001      │
+│ [DEMO] Loaded mock prediction for evt_satpura_001   │
+│ [DEMO] Loaded mock satellite data for evt_satpura_001
+│ [DEMO] Loaded mock enrichment for evt_satpura_001   │
+│ [DEMO] Loaded mock prediction for evt_moga_001      │
+│ [DEMO] Loaded mock satellite data for evt_moga_001  │
+│ [DEMO] Loaded mock enrichment for evt_moga_001      │
+│ ... (and so on for all 5 events)                    │
+│                                                     │
+│ [DEMO] Statistics loaded: 5 events detected         │
+│ [INFO] Dashboard initialized successfully           │
+└─────────────────────────────────────────────────────┘
+
+MEANINGS:
+- [DEMO] = Message from mock adapter (expected in demo mode)
+- [INFO] = Informational message (normal operation)
+- [WARN] = Warning (might indicate issue, but not critical)
+- [ERROR] = Error (something failed, red text in console)
+
+WHEN USER CLICKS MARKER:
+
+│ [DEBUG] Event selected: Satpura
+│ [DEBUG] Fetching enrichment data...
+│ [DEBUG] Rendering land cover chart
+│ [DEBUG] Satellite data loaded
+
+NO ERRORS:
+- Console should show NO red error messages
+- If red errors appear, something is broken
+- Check the error message for clues
+
+
+### HOW TO CHECK BROWSER CONSOLE
+
+WINDOWS:
+1. Press F12 (or Ctrl+Shift+I)
+2. Click "Console" tab
+3. Scroll up to see all messages
+
+MAC:
+1. Press Cmd+Option+I
+2. Click "Console" tab
+
+FIREFOX:
+1. Press F12
+2. Click "Console" tab
+
+SAFARI:
+1. Press Cmd+Option+I
+2. Click "Console" tab
+
+
+### IMPORTANT: No Errors Should Appear
+
+RED ERROR MESSAGES:
+If you see red text in console with errors like:
+- "Cannot read property 'map' of undefined"
+- "Failed to load module"
+- "Unexpected token"
+
+These indicate problems. Contact support with:
+- Browser type and version
+- Exact error message (screenshot)
+- Steps to reproduce
+
+
+================================================================================
+9. DEMO DATA SPECIFICS - Exact Values You'll See
+================================================================================
+
+### COMPLETE EVENT DATA
+
+EVENT 1: PUNE (Industrial Fire)
+─────────────────────────────────────────
+
+LOCATION:
+  City: Pune
+  State: Maharashtra
+  Country: India
+  Coordinates: 18.5204°N, 73.8567°E
+
+CLASSIFICATION:
+  Type: Industrial Fire
+  Icon: 🏭
+
+RISK ASSESSMENT:
+  Risk Score: 87 / 100
+  Risk Level: CRITICAL
+  Confidence: 91%
+  Color on map: 🔴 RED
+
+THERMAL PROPERTIES:
+  FRP (Fire Radiative Power): 74.2
+  Persistence: Repeated anomaly (5 days)
+
+CONTEXT DATA:
+  Industrial Facility: MIDC Industrial Hub (120m away)
+  Water Body: Mutex Canal (920m away)
+  Population Density: High
+
+LAND COVER (Dynamic World):
+  Built: 87%
+  Trees: 4%
+  Grass: 3%
+  Crops: 3%
+  Bare: 2%
+  Water: 1%
+  Shrub & Scrub: 0%
+  Flooded Vegetation: 0%
+  Snow & Ice: 0%
+
+SATELLITE DATA:
+  Available: YES
+  Satellite: Sentinel-2
+  Acquisition Date: 24 Aug 2026
+  Cloud Cover: 20%
+  Status Badge: DEMO
+
+ML PREDICTION:
+  Predicted Class: Industrial Fire
+  Confidence: 91%
+  Key Factors:
+    1. High Thermal Intensity (FRP: 74.2) ← Most important
+    2. Industrial Facility Nearby (MIDC Hub)
+    3. Built-up Area (87% land cover)
+    4. High Population Density
+    5. Persistent (5-day anomaly)
+
+
+EVENT 2: SATPURA (Wildfire)
+─────────────────────────────────────────
+
+LOCATION:
+  City: Satpura Forest Range
+  State: Madhya Pradesh
+  Country: India
+  Coordinates: 22.4646°N, 78.1122°E
+
+CLASSIFICATION:
+  Type: Wildfire / Natural Fire
+  Icon: 🌳
+
+RISK ASSESSMENT:
+  Risk Score: 82 / 100
+  Risk Level: HIGH
+  Confidence: 88%
+  Color on map: 🔴 RED
+
+THERMAL PROPERTIES:
+  FRP: 142.5 (CRITICAL thermal intensity)
+  Persistence: New thermal manifestation
+
+CONTEXT DATA:
+  Industrial Facility: None within 5km
+  Water Body: Denwa River (1.2km away)
+  Population Density: Low to Medium
+
+LAND COVER:
+  Trees: 78%
+  Shrub & Scrub: 12%
+  Grass: 6%
+  Crops: 2%
+  Water: 1%
+  Built: 1%
+  Others: 0%
+
+SATELLITE DATA:
+  Available: YES
+  Satellite: Sentinel-2
+  Acquisition Date: 25 Aug 2026
+  Cloud Cover: 5%
+  Status Badge: DEMO
+
+ML PREDICTION:
+  Predicted Class: Wildfire / Natural Fire
+  Confidence: 88%
+  Key Factors:
+    1. CRITICAL Thermal Intensity (142.5)
+    2. Forest Land Cover (Trees 78%)
+    3. Dry Season (High risk period)
+    4. Wind Conditions (May accelerate spread)
+
+
+EVENT 3: MOGA (Agricultural Fire)
+─────────────────────────────────────────
+
+LOCATION:
+  City: Moga
+  State: Punjab
+  Country: India
+  Coordinates: 31.1471°N, 75.3412°E
+
+CLASSIFICATION:
+  Type: Agricultural Fire
+  Icon: 🌾
+
+RISK ASSESSMENT:
+  Risk Score: 42 / 100
+  Risk Level: LOW
+  Confidence: 95%
+  Color on map: 🟢 GREEN
+
+THERMAL PROPERTIES:
+  FRP: 35.1 (Low thermal intensity)
+  Persistence: Short-lived seasonal activity
+
+CONTEXT DATA:
+  Industrial Facility: Farm Co-op Building (480m away)
+  Water Body: Irrigation Canal (150m away)
+  Population Density: Medium
+
+LAND COVER:
+  Crops: 84%
+  Bare: 10%
+  Built: 4%
+  Trees: 2%
+
+SATELLITE DATA:
+  Available: NO (no satellite image for this location)
+  Status: "Image not available for this region"
+
+ML PREDICTION:
+  Predicted Class: Agricultural Fire
+  Confidence: 95%
+  Key Factors:
+    1. Crop Residue Burning (seasonal)
+    2. Low Thermal Intensity (35.1)
+    3. Agricultural Land (84% crops)
+    4. Near Irrigation Water (low spread risk)
+
+
+EVENT 4: JAMSHEDPUR (Persistent Thermal Source)
+─────────────────────────────────────────────────
+
+LOCATION:
+  City: Jamshedpur
+  State: Jharkhand
+  Country: India
+  Coordinates: 22.8046°N, 86.2029°E
+
+CLASSIFICATION:
+  Type: Persistent Thermal Source
+  Icon: 🔥
+
+RISK ASSESSMENT:
+  Risk Score: 68 / 100
+  Risk Level: MEDIUM
+  Confidence: 99%
+  Color on map: 🟠 ORANGE
+
+THERMAL PROPERTIES:
+  FRP: 92.0 (STABLE thermal intensity)
+  Persistence: Continuous signal (365+ days, industrial source)
+
+CONTEXT DATA:
+  Industrial Facility: Steel Processing Station (40m away)
+  Water Body: Subarnarekha River (2.1km away)
+  Population Density: High
+
+LAND COVER:
+  Built: 92%
+  Bare: 4%
+  Water: 2%
+  Trees: 2%
+
+SATELLITE DATA:
+  Available: YES
+  Satellite: Sentinel-2
+  Acquisition Date: 22 Aug 2026
+  Cloud Cover: 45% (heavy clouds)
+  Status Badge: DEMO
+
+ML PREDICTION:
+  Predicted Class: Persistent Thermal Source (Industrial)
+  Confidence: 99%
+  Key Factors:
+    1. Steel Plant Thermal Operations
+    2. Consistent Multi-Year Signal
+    3. No rapid changes in intensity
+    4. Located in Industrial Zone
+
+
+EVENT 5: RAJASTHAN (Unknown/Other)
+─────────────────────────────────────────────────────────────
+
+LOCATION:
+  City: Thar Basin
+  State: Rajasthan
+  Country: India
+  Coordinates: 26.2389°N, 70.9624°E
+
+CLASSIFICATION:
+  Type: Unknown / Other
+  Icon: ❓
+
+RISK ASSESSMENT:
+  Risk Score: 31 / 100
+  Risk Level: LOW
+  Confidence: 54% (LOW confidence - model uncertain)
+  Color on map: ⚫ GRAY
+
+THERMAL PROPERTIES:
+  FRP: 18.4 (Very low thermal intensity)
+  Persistence: Irregular anomaly
+
+CONTEXT DATA:
+  Industrial Facility: None within 20km
+  Water Body: None (Arid desert region)
+  Population Density: Very Low to None
+
+LAND COVER:
+  Bare: 90%
+  Shrub & Scrub: 8%
+  Built: 1%
+  Grass: 1%
+
+SATELLITE DATA:
+  Available: NO (no satellite image)
+  Status: "Image not available"
+
+ML PREDICTION:
+  Predicted Class: Unknown / Other (Could be: mining activity, geothermal, false positive)
+  Confidence: 54% (UNCERTAIN)
+  Key Factors:
+    1. Very Low Thermal Signal (18.4)
+    2. Desert Region (extreme temperatures normal)
+    3. Model Uncertainty (need more data)
+    4. Possible False Positive
+
+
+### STATISTICS SHOWN ON DASHBOARD
+
+Quick Summary Cards Display:
+
+CARD 1 - Total Detections:
+  Number: 5
+  Trend: ↑ 22% (compared to yesterday)
+  Status: "5 High Risk ↑ 22%"
+
+CARD 2 - Industrial Areas:
+  Number: 2 (Pune + Jamshedpur)
+  Trend: ↑ 2%
+  Status: "Across India ↑ 2%"
+
+CARD 3 - Weather Risk:
+  Number: 2 (High-risk weather in 2 areas)
+  Trend: ↑ 20%
+  Status: "High ↑ 20%"
+
+CARD 4 - Low Risk:
+  Number: 2 (Moga + Rajasthan)
+  Status: "Safe Areas"
+
+THESE ARE CALCULATED FROM 5 EVENTS
+
+
+================================================================================
+10. TESTING CHECKLIST - Verify Everything Works
+================================================================================
+
+### QUICK SMOKE TEST (5 minutes)
+
+1. START APPLICATION
+   □ Run batch file (run_stage3_demo.bat)
+   □ Verify: "Local URL: http://localhost:8080/" message
+   □ Open browser, go to http://localhost:8080/
+   □ Page loads (should be under 2 seconds)
+
+2. VISUAL VERIFICATION
+   □ See demo banner at top (orange)
+   □ See left sidebar with navigation
+   □ See map with 5 colored markers
+   □ See right panel with event details
+   □ See bottom cards with statistics
+   □ See donut chart showing land cover
+
+3. BASIC INTERACTION
+   □ Click different markers (each updates right panel)
+   □ Click Dark Mode button (page turns dark)
+   □ Click Settings in sidebar (settings page appears)
+   □ Click Dashboard (returns to main view)
+
+4. NO ERRORS
+   □ Open browser console (F12)
+   □ No red error messages
+   □ See demo log messages
+
+5. DONE
+   □ If all above pass, basic functionality works!
+
+
+### DETAILED TESTING (20 minutes)
+
+1. PAGE LOAD TEST
+   □ Page loads completely in < 2 seconds
+   □ All 5 markers visible on map
+   □ Markers are correct colors (red, red, green, orange, gray)
+   □ Right panel shows first event (Pune)
+   □ Statistics cards show correct numbers (5, 2, 2, 2)
+
+2. MARKER SELECTION TEST
+   □ Click Pune marker → shows "Industrial Fire", 87/100
+   □ Click Satpura marker → shows "Wildfire", 82/100
+   □ Click Moga marker → shows "Agricultural", 42/100
+   □ Click Jamshedpur marker → shows "Persistent", 68/100
+   □ Click Rajasthan marker → shows "Unknown", 31/100
+   □ Each time, right panel updates with new data
+   □ Land cover chart changes for each event
+   □ Satellite preview updates
+
+3. LAND COVER CHART TEST
+   □ Select Pune → Donut shows 87% Built (center label)
+   □ Legend below shows: Built 87%, Trees 4%, Grass 3%, Crops 3%, etc.
+   □ Select Satpura → Donut shows 78% Trees (center label changes)
+   □ Legend shows different percentages
+   □ Colors match Dynamic World color scheme
+
+4. DARK MODE TEST
+   □ Click 🌙 button
+   □ Page background turns dark
+   □ All text becomes light/white
+   □ All cards become dark
+   □ Button changes to ☀️
+   □ Refresh page → stays dark
+   □ Click ☀️ → returns to light mode
+   □ All interactive elements still work in dark mode
+
+5. SETTINGS PAGE TEST
+   □ Click Settings in sidebar
+   □ Settings form appears
+   □ Sidebar shows Settings highlighted
+   □ Form contains:
+     - Dark Mode checkbox
+     - Demo Mode checkbox (checked)
+     - API Base URL input field
+     - ML Service URL input field
+     - Save and Reset buttons
+   □ Current values display correctly
+   □ Can edit API URL field
+   □ Can check/uncheck checkboxes
+   □ Click Save → Toast shows "Settings saved"
+   □ Refresh page → settings persist
+   □ Click Reset → confirmation appears
+   □ Click Reset → form resets to defaults
+
+6. MAP CONTROLS TEST
+   □ Click [+] button → map zooms in (markers get bigger)
+   □ Click [−] button → map zooms out
+   □ Click [↗️] button → returns to India view (zoom 5)
+   □ Drag map → pans around (standard map behavior)
+   □ Map legend visible (High/Medium/Low/Cluster)
+
+7. RIGHT PANEL TEST (For each event)
+   □ Location section shows: city, state, coordinates
+   □ Risk score section shows: number/100, level, color badge
+   □ Prediction section shows: class, confidence %
+   □ Key factors section shows: 5 items with icons
+   □ Land cover section shows: donut chart + legend
+   □ Satellite section shows: image/placeholder, date, cloud %, DEMO badge
+
+8. STATISTICS TEST
+   □ Total Detections card shows: 5 (number), ↑ 22% (trend)
+   □ Industrial Areas card shows: 2
+   □ Weather Risk card shows: 2
+   □ Low Risk card shows: 2
+
+9. RESPONSIVE DESIGN TEST
+   □ On desktop (1920px): 2-column layout (map + panel side-by-side)
+   □ On tablet (768px): Map above panel (stacked vertically)
+   □ On mobile (375px): Single column (everything stacked)
+   □ At all sizes: map usable, text readable
+
+10. BROWSER CONSOLE TEST
+    □ Open F12
+    □ Click Console tab
+    □ See [DEMO] messages loading
+    □ NO red error messages
+    □ Scroll through console output
+    □ All messages relate to data loading
+
+11. KEYBOARD NAVIGATION TEST
+    □ Press Tab → focus moves through elements (buttons, inputs)
+    □ Press Escape → closes modals/dialogs (if any)
+    □ All interactive elements reachable via keyboard
+
+
+### PERFORMANCE TEST (10 minutes)
+
+1. PAGE LOAD
+   □ Measure load time from first byte to interactive
+   □ Target: < 2 seconds
+   □ Note: Should be instant (local server)
+
+2. INTERACTION RESPONSIVENESS
+   □ Click marker → right panel updates in < 300ms
+   □ Type in settings field → instant response
+   □ Click buttons → immediate feedback
+
+3. MEMORY USAGE
+   □ Open DevTools → Performance tab
+   □ Monitor memory while using app
+   □ Should stay under 30 MB
+
+4. NO MEMORY LEAKS
+   □ Select markers repeatedly (10+ times)
+   □ Memory should not continuously increase
+   □ Should stabilize or decrease
+
+
+### EDGE CASE TESTS (Optional)
+
+1. DISABLE DEMO MODE TEST
+   □ Go to Settings
+   □ Uncheck "Demo Mode"
+   □ Save settings
+   □ Refresh page
+   □ Check browser console → should try to fetch from API
+   □ Since no real API running, should show error or empty
+   □ Re-enable Demo Mode to return to working state
+
+2. CHANGE API URLs TEST
+   □ Go to Settings
+   □ Change API Base URL to: http://localhost:9999/api
+   □ Click Save
+   □ Refresh page
+   □ Check console → should try to connect to 9999
+   □ Will fail (port doesn't exist) but shows system routing works
+
+3. CLEAR BROWSER DATA TEST
+   □ Clear cookies and storage (DevTools → Storage → Clear All)
+   □ Refresh page
+   □ Page should still load with defaults
+   □ Dark mode should be light (default)
+   □ Demo mode should be enabled (default)
+
+4. OFFLINE TEST (Advanced)
+   □ Open DevTools → Network tab
+   □ Throttle to "Offline"
+   □ Refresh page
+   □ Page should still load (all local data)
+   □ No network errors in console
+
+
+### FINAL VERIFICATION CHECKLIST
+
+Before calling it "ready for production demo":
+
+□ ALL above tests pass
+□ NO red errors in console
+□ Page loads in < 2 seconds
+□ All 5 events display correctly
+□ All UI elements visible and styled
+□ Dark mode works and persists
+□ Settings save and persist
+□ Responsive design works at all sizes
+□ Date/time updates every second
+□ Map controls work
+□ Marker selection works
+□ Land cover chart renders correctly
+□ No console errors or warnings
+
+
+================================================================================
+QUICK REFERENCE CARD
+================================================================================
+
+WHAT YOU SHOULD SEE:
+✓ Dashboard with India map
+✓ 5 colored markers (red, red, green, orange, gray)
+✓ Right panel with event details
+✓ Bottom cards with statistics
+✓ Donut chart for land cover
+✓ Satellite preview
+✓ Dark mode support
+✓ Settings accessible
+
+WHAT YOU SHOULD BE ABLE TO DO:
+✓ Click markers → right panel updates
+✓ Toggle dark mode → page turns dark
+✓ Go to Settings → fill in API URLs
+✓ Zoom map → use [+] and [−] buttons
+✓ Reset map → use [↗️] button
+✓ View all 5 events → one at a time
+
+WHAT YOU SHOULD NOT SEE:
+✗ Red errors in browser console
+✗ Blank/empty map
+✗ Missing markers or data
+✗ Broken styling or layout issues
+✗ Unresponsive buttons or inputs
+
+EXPECTED PERFORMANCE:
+✓ Page loads: < 2 seconds
+✓ Click marker: < 300ms to update
+✓ Dark mode toggle: < 100ms
+✓ No lag or stuttering
+✓ All animations smooth
+
+
+================================================================================
+TROUBLESHOOTING QUICK GUIDE
+================================================================================
+
+PROBLEM                    SOLUTION
+────────────────────────────────────────────────────────
+
+Batch file won't run        Install Python + add to PATH
+Port 8080 in use            Use different port (8000, 8001, etc.)
+Files not found             Run batch from correct directory
+Page loads blank            Hard refresh (Ctrl+Shift+R)
+Markers not showing         Refresh page, check console
+Dark mode not saving        Check browser localStorage permissions
+API connection failing      Make sure demo mode is enabled
+Slow page load              Close other browser tabs, try different browser
+Console errors              Take screenshot, check supported browser
+
+
+================================================================================
+END OF DOCUMENT
+================================================================================
+
+Last Updated: August 26, 2026
+Version: 1.0
+Status: Ready for Testing
+Next Steps: Follow testing checklist above

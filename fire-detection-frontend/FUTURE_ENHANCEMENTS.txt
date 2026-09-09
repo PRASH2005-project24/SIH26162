@@ -1,0 +1,1349 @@
+================================================================================
+  FIRE INTELLIGENCE DASHBOARD - FUTURE ENHANCEMENTS & ROADMAP
+  Real-World Production System Features
+================================================================================
+
+Date Created: August 26, 2026
+Status: Recommendations for Production Deployment
+Target: Transform Demo into Enterprise-Grade Real-World System
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+1. CRITICAL FEATURES FOR PRODUCTION (Must-Have)
+2. ADVANCED ANALYTICS & INTELLIGENCE (High Priority)
+3. USER MANAGEMENT & SECURITY (Essential)
+4. ALERTING & NOTIFICATION SYSTEM (Critical)
+5. HISTORICAL DATA & TRENDS (Important)
+6. REPORTING & EXPORT CAPABILITIES (Important)
+7. INTEGRATION & AUTOMATION (Advanced)
+8. MOBILE & FIELD OPERATIONS (Optional)
+9. UI/UX ENHANCEMENTS (Progressive)
+10. TECHNICAL INFRASTRUCTURE (Backend)
+
+================================================================================
+1. CRITICAL FEATURES FOR PRODUCTION (Must-Have)
+================================================================================
+
+### 1.1 REAL-TIME EVENT STREAMING
+**Why:** Currently refreshes on page load. Real fires spread fast - need live updates.
+
+**What to Add:**
+- WebSocket connection to backend for real-time thermal event push
+- Auto-refresh events every 30-60 seconds (configurable)
+- Visual notification when new events appear
+- Blinking/pulsing markers for new high-risk events
+
+**Where to Change:**
+└── src/services/eventsService.js
+    ├── Add: initWebSocket() function
+    ├── Add: subscribeToEvents(callback) function
+    └── Add: AUTO_REFRESH_INTERVAL configuration
+
+└── script.js
+    ├── Add: WebSocket connection initialization on page load
+    ├── Add: handleNewEvent(event) to add marker dynamically
+    └── Add: showNewEventNotification(event) popup
+
+└── style.css
+    ├── Add: .new-event-notification (toast popup styles)
+    ├── Add: @keyframes pulse for new markers
+    └── Add: .marker-new class with animation
+
+**UI Changes:**
+- Top-right notification bell shows count of new events (last 1 hour)
+- Small toast popup appears when new critical event detected
+- Map marker pulses for 10 seconds when newly added
+
+
+### 1.2 FIRE SPREAD PREDICTION VISUALIZATION
+**Why:** Help responders anticipate fire movement direction and speed.
+
+**What to Add:**
+- Fire spread prediction polygons on map (6hr, 12hr, 24hr forecasts)
+- Wind direction arrows overlay
+- Predicted affected areas highlighting
+- Population at risk calculation
+
+**Where to Change:**
+└── src/services/predictionService.js
+    ├── Add: getFireSpreadPrediction(eventId) function
+    └── Add: calculateAffectedAreas(spreadData) function
+
+└── script.js
+    ├── Add: renderSpreadPrediction(spreadData) to draw polygons
+    ├── Add: L.polygon() layers for 6hr/12hr/24hr predictions
+    ├── Add: Wind arrow overlay using L.marker with rotation
+    └── Add: Toggle button to show/hide spread predictions
+
+└── index.html
+    ├── Add: Checkbox in Selected Detection panel: "Show Spread Prediction"
+    └── Add: New section "Predicted Impact" with affected area stats
+
+└── style.css
+    └── Add: .spread-polygon-6hr, .spread-polygon-12hr, .spread-polygon-24hr
+        (different opacity levels, orange → red gradient)
+
+**UI Changes:**
+- Selected Detection panel shows "Fire Spread Forecast" section
+- 3 translucent polygons on map (light → dark = 6hr → 24hr)
+- Wind arrows pointing in predicted direction
+- Stats: "~2,500 people in predicted path", "3 villages at risk"
+
+
+### 1.3 PRIORITY SCORING & TRIAGE SYSTEM
+**Why:** Multiple fires at once - which one needs response first?
+
+**What to Add:**
+- Priority queue ranking (not just risk score)
+- Response urgency indicator (Immediate / Within 1hr / Within 6hr / Monitor)
+- Resource allocation suggestions
+- Automated triage based on: risk + population + infrastructure + fire size
+
+**Where to Change:**
+└── src/services/eventsService.js
+    ├── Add: calculatePriority(event) function
+    ├── Factors: risk_score * 0.3 + population_density * 0.25 +
+    │           infrastructure_proximity * 0.2 + frp * 0.15 +
+    │           wind_speed * 0.1
+    └── Add: sortEventsByPriority(events) function
+
+└── script.js
+    ├── Add: Priority badge to each event (P1, P2, P3, P4)
+    ├── Add: Sorting dropdown: "Sort by: Priority / Risk / Time / Location"
+    └── Add: Filter: "Show only P1 & P2 events"
+
+└── index.html
+    ├── Add: Left sidebar section "Priority Queue" with sorted list
+    └── Add: Each event shows: P1 🔴 IMMEDIATE | P2 🟠 1 HOUR | P3 🟡 6 HOURS | P4 🟢 MONITOR
+
+└── style.css
+    └── Add: .priority-badge (colored pill badges)
+
+**UI Changes:**
+- New left sidebar section: "PRIORITY QUEUE" (above Classifications)
+- Top 5 events listed with priority badges
+- Click to center map on that event
+- Detection panel shows "Priority: P1 - IMMEDIATE RESPONSE REQUIRED"
+
+
+### 1.4 RESPONSE COORDINATION PANEL
+**Why:** Dashboard users need to dispatch teams and track response status.
+
+**What to Add:**
+- Event status: New / Under Investigation / Response Dispatched / Contained / Resolved
+- Assigned team/unit tracking
+- Response timeline tracking
+- Notes/comments system for responders
+
+**Where to Change:**
+└── src/services/responseService.js (NEW FILE)
+    ├── Add: updateEventStatus(eventId, status) function
+    ├── Add: assignTeam(eventId, teamId) function
+    ├── Add: addResponseNote(eventId, note) function
+    └── Add: getResponseHistory(eventId) function
+
+└── script.js
+    ├── Add: Response Actions section in Selected Detection panel
+    ├── Add: Status dropdown (New → Under Investigation → Dispatched → Contained → Resolved)
+    ├── Add: Assign Team dropdown (from available teams list)
+    └── Add: Notes textarea with timestamp
+
+└── index.html
+    ├── Add: "Response Coordination" section in Selected Detection panel
+    ├── Add: Status dropdown, Team dropdown, Notes input
+    └── Add: "Response History" timeline showing all status changes
+
+└── style.css
+    ├── Add: .response-actions (form styling)
+    ├── Add: .status-badge (status-specific colors)
+    └── Add: .response-timeline (vertical timeline with icons)
+
+**UI Changes:**
+- Selected Detection panel gets new section at bottom
+- Dropdown to change status (triggers backend update)
+- Dropdown to assign team (e.g., "Fire Station 3", "Forest Dept Unit A")
+- Timeline shows: "10:15 AM - Status changed to Dispatched by admin"
+
+
+### 1.5 WEATHER INTEGRATION (CRITICAL FOR FIRE BEHAVIOR)
+**Why:** Wind, humidity, temperature directly affect fire spread.
+
+**What to Add:**
+- Real-time weather data overlay for each event location
+- Wind speed/direction
+- Temperature, humidity, pressure
+- Weather alerts (high wind warnings, dry conditions)
+- 24-hour weather forecast for event location
+
+**Where to Change:**
+└── src/services/weatherService.js (NEW FILE)
+    ├── Add: getWeatherForLocation(lat, lng) function
+    ├── Add: getWeatherForecast(lat, lng, hours) function
+    ├── Add: getWeatherAlerts(lat, lng) function
+    └── API Integration: OpenWeatherMap or India Meteorological Department
+
+└── script.js
+    ├── Add: Weather section in Selected Detection panel
+    ├── Add: Wind arrows on map overlay (optional toggle)
+    └── Add: Weather alert banner if dangerous conditions
+
+└── index.html
+    └── Add: "Weather Conditions" section in Selected Detection panel
+        ├── Temperature: 38°C
+        ├── Wind: 25 km/h NW
+        ├── Humidity: 15% (VERY DRY ⚠️)
+        └── Forecast: High winds expected 2-6 PM
+
+└── style.css
+    └── Add: .weather-alert (red/orange banner for dangerous conditions)
+
+**UI Changes:**
+- Selected Detection panel shows weather icon + stats
+- Red alert banner if: humidity < 20% OR wind > 30 km/h OR temp > 40°C
+- Wind direction arrow pointing on map
+
+
+================================================================================
+2. ADVANCED ANALYTICS & INTELLIGENCE (High Priority)
+================================================================================
+
+### 2.1 HISTORICAL HEATMAP & PATTERN ANALYSIS
+**Why:** Identify recurring hotspots, seasonal patterns, high-risk zones.
+
+**What to Add:**
+- Heatmap layer showing historical fire density
+- Date range selector (last 7 days / 30 days / 3 months / 1 year)
+- Seasonal pattern detection (agricultural burning seasons, forest fire seasons)
+- High-risk zone polygons
+
+**Where to Change:**
+└── src/services/analyticsService.js (NEW FILE)
+    ├── Add: getHistoricalEvents(startDate, endDate) function
+    ├── Add: generateHeatmapData(events) function
+    ├── Add: detectPatterns(events) function
+    └── Add: getHighRiskZones() function
+
+└── script.js
+    ├── Add: Heatmap layer using Leaflet.heat plugin
+    ├── Add: Date range picker in top header
+    ├── Add: Toggle button: "Show Historical Heatmap"
+    └── Add: Analytics sidebar section with insights
+
+└── index.html
+    ├── Add: Date range picker (from: ___ to: ___)
+    ├── Add: "Analytics" menu item in left sidebar
+    └── Add: New "Analytics View" with charts and insights
+
+└── style.css
+    └── Add: .heatmap-controls (date picker styling)
+
+**UI Changes:**
+- New sidebar menu: "Analytics"
+- Map overlay: red heatmap showing fire density
+- Insights panel: "Agricultural fires peak in Oct-Nov", "Forest fires peak in Mar-May"
+
+
+### 2.2 COMPARISON & CLUSTERING
+**Why:** Multiple fires in same area might be related (same cause, coordinated arson).
+
+**What to Add:**
+- Automatic clustering of nearby events (within 50km radius)
+- Cluster analysis: similar causes, simultaneous timing, pattern matching
+- Side-by-side comparison of 2+ events
+- Cluster risk escalation (many small fires → large wildfire)
+
+**Where to Change:**
+└── src/services/clusteringService.js (NEW FILE)
+    ├── Add: detectClusters(events, radiusKm) function
+    ├── Add: analyzeCluster(clusterEvents) function
+    └── Add: calculateClusterRisk(clusterEvents) function
+
+└── script.js
+    ├── Add: L.markerClusterGroup() for map clustering
+    ├── Add: Cluster circle when multiple events close together
+    ├── Add: Click cluster → zoom in and expand
+    └── Add: Comparison mode: select 2 events, show side-by-side
+
+└── index.html
+    └── Add: "Comparison Mode" button in header
+        Click → Select 2 events → Show comparison table
+
+└── style.css
+    └── Add: .comparison-view (split-screen layout)
+
+**UI Changes:**
+- Blue cluster circles on map (number shows count)
+- Click cluster → see all events in that area
+- Comparison button → select 2 events → side-by-side table
+
+
+### 2.3 PREDICTIVE RISK MODELING
+**Why:** Forecast high-risk areas BEFORE fires start (prevention).
+
+**What to Add:**
+- Daily risk forecast map (next 7 days)
+- Risk factors: weather + vegetation dryness + historical data + seasonal patterns
+- Preventive action recommendations
+- Alert system for newly high-risk areas
+
+**Where to Change:**
+└── src/services/riskForecastService.js (NEW FILE)
+    ├── Add: getDailyRiskForecast() function
+    ├── Add: calculatePreventiveScore(region) function
+    └── Add: getPreventiveActions(region) function
+
+└── script.js
+    ├── Add: Risk forecast map layer (toggle on/off)
+    ├── Add: Color-coded polygons: green (low) → yellow → orange → red (extreme)
+    └── Add: "Forecast" tab in dashboard (alongside "Live Events")
+
+└── index.html
+    └── Add: Tabs at top: [Live Events] [7-Day Forecast]
+        Forecast view shows risk prediction map
+
+**UI Changes:**
+- New tab: "7-Day Forecast"
+- Map shows color-coded regions (risk levels)
+- Click region → "High risk for wildfires, recommend: patrol, public alerts"
+
+
+================================================================================
+3. USER MANAGEMENT & SECURITY (Essential)
+================================================================================
+
+### 3.1 MULTI-USER AUTHENTICATION & AUTHORIZATION
+**Why:** Different users need different access (admin, dispatcher, field officer, viewer).
+
+**What to Add:**
+- Login/logout system
+- Role-based access control (RBAC)
+  - Admin: Full access, manage users, change settings
+  - Dispatcher: View events, assign teams, update status
+  - Field Officer: View only, add notes
+  - Analyst: View + analytics, reports
+  - Public Viewer: Limited view (no sensitive data)
+- User profile page
+- Activity logging (audit trail)
+
+**Where to Change:**
+└── src/services/authService.js (NEW FILE)
+    ├── Add: login(username, password) function
+    ├── Add: logout() function
+    ├── Add: getCurrentUser() function
+    ├── Add: checkPermission(action) function
+    └── Add: getUserRole() function
+
+└── script.js
+    ├── Add: Login screen (before dashboard loads)
+    ├── Add: User info display in header (username, role, logout button)
+    ├── Add: Permission checks before sensitive actions
+    └── Add: Session timeout (auto-logout after 30 min inactivity)
+
+└── index.html
+    ├── Add: Login modal (username, password, login button)
+    ├── Add: User dropdown in header (Profile, Settings, Logout)
+    └── Add: Hide features based on role
+
+└── style.css
+    └── Add: .login-modal, .user-dropdown
+
+**UI Changes:**
+- Login screen on first load
+- Top-right shows: "👤 John Doe (Dispatcher) ▼" → dropdown with Logout
+- Features disabled if no permission (grayed out)
+
+
+### 3.2 AUDIT TRAIL & ACTIVITY LOGGING
+**Why:** Track who did what, when (compliance, security, accountability).
+
+**What to Add:**
+- Log all user actions: login, event view, status change, team assignment, report download
+- Activity timeline per event (who viewed, who assigned, who resolved)
+- System-wide activity log (admin view)
+- Export activity logs
+
+**Where to Change:**
+└── src/services/auditService.js (NEW FILE)
+    ├── Add: logAction(action, details) function
+    ├── Add: getActivityLog(eventId) function
+    └── Add: getSystemActivityLog(startDate, endDate) function
+
+└── script.js
+    └── Add: Call logAction() after every important action
+
+└── index.html
+    └── Add: "Activity Log" section in Selected Detection panel
+        Shows: "10:30 AM - admin viewed event"
+                "10:45 AM - dispatcher assigned Team 3"
+
+**UI Changes:**
+- Activity timeline in each event panel
+- Admin menu: "System Activity Log" (table view)
+
+
+================================================================================
+4. ALERTING & NOTIFICATION SYSTEM (Critical)
+================================================================================
+
+### 4.1 MULTI-CHANNEL ALERTING
+**Why:** Users not always watching dashboard - need push notifications.
+
+**What to Add:**
+- Browser push notifications (critical events)
+- Email alerts (high-risk events)
+- SMS alerts (emergency only)
+- WhatsApp alerts (India-specific)
+- Alert rules configuration (when to alert, who to alert)
+
+**Where to Change:**
+└── src/services/alertService.js (NEW FILE)
+    ├── Add: sendBrowserNotification(title, body) function
+    ├── Add: sendEmailAlert(email, event) function
+    ├── Add: sendSMSAlert(phone, event) function
+    └── Add: checkAlertRules(event) function
+
+└── script.js
+    ├── Add: Request notification permission on load
+    ├── Add: Trigger alerts when new P1/P2 events appear
+    └── Add: Browser notification: "🔥 CRITICAL: Industrial fire in Pune"
+
+└── index.html
+    └── Add: Settings → "Alerts" section
+        ├── Enable browser notifications
+        ├── Email: john@example.com
+        ├── Alert for: P1 only / P1 & P2 / All events
+
+**UI Changes:**
+- Settings page has "Alerts" section
+- Checkboxes: □ Browser notifications □ Email alerts □ SMS alerts
+- Alert rules: "Notify me when: Risk > 80 OR Priority = P1"
+
+
+### 4.2 ESCALATION WORKFLOWS
+**Why:** If no action taken on critical event within X minutes, escalate to supervisor.
+
+**What to Add:**
+- Auto-escalation rules (P1 unassigned for 15 min → alert supervisor)
+- Escalation chain (Team Lead → Department Head → District Officer)
+- Escalation history tracking
+
+**Where to Change:**
+└── src/services/escalationService.js (NEW FILE)
+    ├── Add: checkEscalation(event) function (run periodically)
+    ├── Add: escalateToSupervisor(eventId) function
+    └── Add: getEscalationChain(event) function
+
+└── script.js
+    └── Add: Background timer checking unassigned P1 events every 5 minutes
+
+└── index.html
+    └── Add: Escalation badge in event list if escalated
+
+**UI Changes:**
+- Event shows: "⚠️ ESCALATED TO SUPERVISOR" badge
+- Activity log: "11:00 AM - Auto-escalated (no action for 15 min)"
+
+
+================================================================================
+5. HISTORICAL DATA & TRENDS (Important)
+================================================================================
+
+### 5.1 TIME-SERIES CHARTS & TRENDS
+**Why:** Understand patterns, measure effectiveness of response over time.
+
+**What to Add:**
+- Line chart: Events per day (last 30 days)
+- Bar chart: Events by classification type
+- Pie chart: Events by risk level
+- Response time trend (average time to assign team)
+- Resolution time trend (average time to resolve)
+
+**Where to Change:**
+└── src/services/trendsService.js (NEW FILE)
+    ├── Add: getEventsTimeSeries(days) function
+    ├── Add: getClassificationBreakdown() function
+    └── Add: getResponseMetrics() function
+
+└── script.js
+    ├── Add: Chart.js library for visualizations
+    ├── Add: renderLineChart(), renderBarChart(), renderPieChart()
+    └── Add: Charts in Analytics view
+
+└── index.html
+    └── Add: "Analytics" view with 4-6 charts
+
+└── style.css
+    └── Add: .analytics-grid (chart container layout)
+
+**UI Changes:**
+- Analytics tab shows multiple charts
+- Date range selector affects all charts
+- Export chart as PNG button
+
+
+### 5.2 EVENT HISTORY & TIMELINE
+**Why:** Track single event lifecycle from detection → resolution.
+
+**What to Add:**
+- Complete event history (all status changes, assignments, notes)
+- Visual timeline with timestamps
+- Linked satellite images over time
+- Fire progression tracking (size increase/decrease)
+
+**Where to Change:**
+└── src/services/historyService.js (NEW FILE)
+    └── Add: getEventHistory(eventId) function
+
+└── script.js
+    └── Add: Expandable timeline in Selected Detection panel
+
+└── index.html
+    └── Add: "History" accordion in Selected Detection panel
+        Shows vertical timeline with all events
+
+**UI Changes:**
+- Click "History ▼" in event panel → timeline expands
+- Shows: Detection → Investigation → Team Assigned → Contained → Resolved
+
+
+================================================================================
+6. REPORTING & EXPORT CAPABILITIES (Important)
+================================================================================
+
+### 6.1 AUTOMATED REPORT GENERATION
+**Why:** Daily/weekly reports for management, compliance, stakeholders.
+
+**What to Add:**
+- Daily summary report (total events, classifications, response times)
+- Weekly trend report (comparisons to previous week)
+- Monthly statistical report
+- Custom report builder (date range, filters, metrics)
+- Export formats: PDF, Excel, CSV, JSON
+
+**Where to Change:**
+└── src/services/reportService.js (NEW FILE)
+    ├── Add: generateDailyReport() function
+    ├── Add: generateWeeklyReport() function
+    ├── Add: generateCustomReport(filters) function
+    └── Add: exportReport(report, format) function
+
+└── script.js
+    ├── Add: "Reports" menu in sidebar
+    └── Add: Report configuration UI
+
+└── index.html
+    └── Add: "Reports" view
+        ├── Report type dropdown
+        ├── Date range picker
+        ├── Filters (classification, risk level, region)
+        └── Export button
+
+**UI Changes:**
+- New sidebar menu: "Reports"
+- Report preview in browser
+- Download buttons: [PDF] [Excel] [CSV]
+
+
+### 6.2 DATA EXPORT & API
+**Why:** Integration with other systems, data analysis in external tools.
+
+**What to Add:**
+- Export current view as CSV/Excel
+- Export selected event details
+- Export analytics data
+- Public API endpoints (with authentication)
+
+**Where to Change:**
+└── src/services/exportService.js (NEW FILE)
+    ├── Add: exportToCSV(data) function
+    ├── Add: exportToExcel(data) function
+    └── Add: exportToJSON(data) function
+
+└── script.js
+    └── Add: "Export" button in header (exports current view)
+
+└── index.html
+    └── Add: Export dropdown: [CSV] [Excel] [JSON] [PDF]
+
+**UI Changes:**
+- Export button in top header
+- Click → dropdown with format options
+- Downloads file: "fire_events_2026-08-26.csv"
+
+
+================================================================================
+7. INTEGRATION & AUTOMATION (Advanced)
+================================================================================
+
+### 7.1 THIRD-PARTY INTEGRATIONS
+**Why:** Connect to existing emergency response systems.
+
+**What to Add:**
+- Integration with emergency dispatch systems (CAD - Computer-Aided Dispatch)
+- Integration with GIS systems (ArcGIS, QGIS)
+- Integration with weather services (IMD, OpenWeatherMap)
+- Integration with satellite providers (ISRO, Sentinel Hub)
+- Integration with communication systems (radio, SMS gateway)
+
+**Where to Change:**
+└── src/integrations/ (NEW FOLDER)
+    ├── cadIntegration.js (send events to dispatch system)
+    ├── gisIntegration.js (sync with GIS)
+    ├── weatherIntegration.js (pull weather data)
+    └── satelliteIntegration.js (fetch real satellite images)
+
+└── index.html
+    └── Add: Settings → "Integrations" section
+        Checkboxes for each integration + configuration
+
+**Backend Work:**
+- API endpoints to push events to external systems
+- Webhooks to receive updates from external systems
+
+
+### 7.2 AUTOMATED WORKFLOWS
+**Why:** Reduce manual work, speed up response.
+
+**What to Add:**
+- Auto-assign teams based on location proximity
+- Auto-escalate based on rules
+- Auto-generate reports on schedule
+- Auto-send alerts when conditions met
+- Auto-archive resolved events after 30 days
+
+**Where to Change:**
+└── src/services/workflowService.js (NEW FILE)
+    ├── Add: autoAssignTeam(event) function (finds nearest available team)
+    ├── Add: autoArchiveOldEvents() function (runs daily)
+    └── Add: autoGenerateScheduledReports() function
+
+└── index.html
+    └── Add: Settings → "Automation" section
+        Checkboxes: □ Auto-assign teams □ Auto-escalate □ Auto-archive
+
+**Backend Work:**
+- Scheduled jobs (cron) for automation tasks
+- Team location database for auto-assignment
+
+
+================================================================================
+8. MOBILE & FIELD OPERATIONS (Optional)
+================================================================================
+
+### 8.1 MOBILE-RESPONSIVE IMPROVEMENTS
+**Why:** Field officers need mobile access.
+
+**What to Add:**
+- Mobile-optimized layout (current responsive design is good, but enhance)
+- Bottom navigation bar on mobile
+- Swipe gestures (swipe event card to mark resolved)
+- Offline mode (cache events, sync when online)
+- GPS location tracking (field officer location on map)
+
+**Where to Change:**
+└── style.css
+    ├── Enhance @media (max-width: 768px) styles
+    ├── Add: Bottom navigation bar for mobile
+    └── Add: Swipe gesture CSS animations
+
+└── script.js
+    ├── Add: Service worker for offline support
+    ├── Add: Geolocation API to track field officer
+    └── Add: Touch event handlers for swipe gestures
+
+└── index.html
+    └── Add: Mobile bottom nav: [Map] [List] [Profile]
+
+**UI Changes:**
+- Mobile: bottom nav bar with 3 icons
+- Swipe event card left → Quick actions menu
+- Offline banner: "You're offline. Changes will sync when connected."
+
+
+### 8.2 FIELD OFFICER APP FEATURES
+**Why:** Officers in field need different tools than dispatchers.
+
+**What to Add:**
+- "I'm responding to this event" button (updates status + shows officer location)
+- Photo upload from field (incident photos)
+- Voice notes (quick updates without typing)
+- Quick status updates (dropdown: Investigating, Contained, Need backup)
+- Navigation to event location (Google Maps integration)
+
+**Where to Change:**
+└── src/services/fieldService.js (NEW FILE)
+    ├── Add: markResponding(eventId, officerId) function
+    ├── Add: uploadPhoto(eventId, photo) function
+    └── Add: addVoiceNote(eventId, audio) function
+
+└── script.js
+    └── Add: Field officer action buttons in event panel
+
+└── index.html
+    └── Add: "Field Actions" section (only visible for field officer role)
+        [I'm Responding] [Upload Photo] [Voice Note] [Navigate]
+
+**UI Changes:**
+- Field officers see simplified UI (no analytics, settings)
+- Big action buttons: [Responding] [Contained] [Need Backup]
+- Map shows blue dot for officer's current location
+
+
+================================================================================
+9. UI/UX ENHANCEMENTS (Progressive)
+================================================================================
+
+### 9.1 ADVANCED FILTERING & SEARCH
+**Why:** Hundreds of events - need to find specific ones quickly.
+
+**What to Add:**
+- Search bar (search by location, event ID, classification)
+- Advanced filters sidebar
+  - Date range
+  - Risk level (High/Medium/Low)
+  - Classification type
+  - Status (New/Assigned/Resolved)
+  - Priority (P1/P2/P3/P4)
+  - Region/state/district
+- Saved filter presets ("My high-risk events", "Unassigned P1")
+- Filter chips (show active filters, click to remove)
+
+**Where to Change:**
+└── script.js
+    ├── Add: Search input handler (filters events array)
+    ├── Add: Filter UI (checkboxes, dropdowns, date pickers)
+    ├── Add: applyFilters(events, filters) function
+    └── Add: saveFilterPreset(), loadFilterPreset()
+
+└── index.html
+    ├── Add: Search bar in header (🔍 Search events...)
+    └── Add: Filters sidebar (collapsible)
+
+└── style.css
+    └── Add: .filter-sidebar, .filter-chip
+
+**UI Changes:**
+- Search bar in top header
+- Filters icon → opens sidebar with all filter options
+- Active filters show as chips: "High Risk ✕" "P1 ✕" "Last 7 days ✕"
+
+
+### 9.2 CUSTOMIZABLE DASHBOARD LAYOUT
+**Why:** Different users want different information prominent.
+
+**What to Add:**
+- Drag-and-drop dashboard widgets
+- Show/hide panels (Quick Summary, Land Cover, Satellite)
+- Resizable panels
+- Save layout preferences per user
+- Multiple dashboard views (Overview, Detailed, Analytics)
+
+**Where to Change:**
+└── script.js
+    ├── Add: Dashboard layout manager (save/load layout)
+    ├── Add: Drag-and-drop using HTML5 Drag API
+    └── Add: View switcher: [Overview] [Detailed] [Analytics]
+
+└── index.html
+    └── Add: View tabs at top of dashboard
+        Add: Drag handles on each panel
+
+└── style.css
+    └── Add: .draggable, .drag-handle
+
+**UI Changes:**
+- Top tabs: [Overview] [Detailed] [Analytics]
+- Each panel has ⠿ drag handle icon
+- Panels can be reordered, resized, hidden
+
+
+### 9.3 ACCESSIBILITY IMPROVEMENTS
+**Why:** Compliance with accessibility standards (WCAG 2.1).
+
+**What to Add:**
+- Keyboard navigation (tab through all interactive elements)
+- Screen reader support (ARIA labels)
+- High contrast mode
+- Text size adjustment
+- Focus indicators (visible outlines)
+- Alt text for all images/icons
+
+**Where to Change:**
+└── index.html
+    ├── Add: ARIA labels to all buttons, inputs
+    ├── Add: role attributes (role="navigation", role="main")
+    └── Add: Alt text to all icons
+
+└── style.css
+    ├── Add: :focus styles (visible outlines)
+    ├── Add: High contrast mode CSS
+    └── Add: Text size variables (adjustable)
+
+└── script.js
+    └── Add: Keyboard shortcuts (Esc to close modals, Arrow keys to navigate)
+
+**UI Changes:**
+- Settings → Accessibility section
+  - High contrast mode toggle
+  - Text size: [Small] [Medium] [Large]
+- All interactive elements keyboard-accessible
+- Screen reader reads all content correctly
+
+
+### 9.4 PERFORMANCE OPTIMIZATIONS
+**Why:** Hundreds of events on map can slow down browser.
+
+**What to Add:**
+- Marker clustering (don't render 500 individual markers)
+- Lazy loading (load event details only when clicked)
+- Pagination (show 50 events at a time)
+- Virtual scrolling for event lists
+- Image lazy loading (satellite images)
+- Service worker caching (offline support + speed)
+
+**Where to Change:**
+└── script.js
+    ├── Add: L.markerClusterGroup() instead of individual markers
+    ├── Add: Pagination controls (page 1 of 10)
+    ├── Add: Lazy load event details on marker click
+    └── Add: Service worker registration
+
+└── index.html
+    └── Add: Pagination controls below map
+        [← Previous] Page 1 of 10 [Next →]
+
+└── style.css
+    └── Add: Loading skeletons for lazy-loaded content
+
+**UI Changes:**
+- Map shows clusters when zoomed out
+- Event list shows 50 at a time with pagination
+- Faster load times, smoother scrolling
+
+
+================================================================================
+10. TECHNICAL INFRASTRUCTURE (Backend)
+================================================================================
+
+### 10.1 BACKEND API ENHANCEMENTS
+**Why:** Current setup assumes simple REST API. Need more robust backend.
+
+**What to Add:**
+- RESTful API with proper error handling
+- Authentication endpoints (/login, /logout, /refresh-token)
+- Rate limiting (prevent API abuse)
+- Input validation and sanitization
+- API versioning (/api/v1/events)
+- Webhook support (notify external systems)
+- GraphQL option (alternative to REST)
+
+**Endpoints Needed:**
+POST   /api/v1/auth/login              (user login)
+POST   /api/v1/auth/logout             (user logout)
+GET    /api/v1/events                  (list events, with filters)
+GET    /api/v1/events/{id}             (single event details)
+POST   /api/v1/events/{id}/status      (update event status)
+POST   /api/v1/events/{id}/assign      (assign team)
+POST   /api/v1/events/{id}/notes       (add note)
+GET    /api/v1/predictions/{eventId}   (ML prediction)
+GET    /api/v1/statistics              (dashboard stats)
+GET    /api/v1/analytics/trends        (historical trends)
+POST   /api/v1/alerts                  (send alert)
+GET    /api/v1/reports/{type}          (generate report)
+GET    /api/v1/weather/{lat}/{lng}     (weather data)
+
+
+### 10.2 DATABASE SCHEMA (PostgreSQL + PostGIS)
+**Why:** Backend needs structured database for production.
+
+**Tables Needed:**
+
+TABLE: events
+- id (UUID, primary key)
+- event_id (VARCHAR, unique, indexed)
+- location (GEOGRAPHY, PostGIS point)
+- city, state, country (VARCHAR)
+- latitude, longitude (NUMERIC)
+- classification (ENUM: industrial, wildfire, agricultural, thermal, unknown)
+- risk_score (INTEGER, 0-100)
+- risk_level (ENUM: low, medium, high, critical)
+- confidence (NUMERIC, 0-1)
+- frp (NUMERIC)
+- persistence (VARCHAR)
+- detected_at (TIMESTAMP)
+- status (ENUM: new, investigating, dispatched, contained, resolved)
+- priority (ENUM: p1, p2, p3, p4)
+- assigned_team_id (UUID, foreign key)
+- created_at, updated_at (TIMESTAMP)
+
+TABLE: enrichment_data
+- id (UUID, primary key)
+- event_id (UUID, foreign key)
+- industrial_context (TEXT)
+- water_context (TEXT)
+- population_density (VARCHAR)
+- land_cover (JSONB, 9 classes with percentages)
+
+TABLE: predictions
+- id (UUID, primary key)
+- event_id (UUID, foreign key)
+- predicted_class (VARCHAR)
+- confidence (NUMERIC)
+- risk_score (INTEGER)
+- model_version (VARCHAR)
+- key_factors (JSONB, array)
+- predicted_at (TIMESTAMP)
+
+TABLE: satellite_data
+- id (UUID, primary key)
+- event_id (UUID, foreign key)
+- image_url (TEXT)
+- acquisition_date (DATE)
+- cloud_cover (INTEGER)
+- satellite_name (VARCHAR)
+
+TABLE: users
+- id (UUID, primary key)
+- username (VARCHAR, unique)
+- password_hash (VARCHAR)
+- email (VARCHAR)
+- role (ENUM: admin, dispatcher, field_officer, analyst, viewer)
+- created_at (TIMESTAMP)
+
+TABLE: teams
+- id (UUID, primary key)
+- name (VARCHAR)
+- location (GEOGRAPHY, PostGIS point)
+- status (ENUM: available, responding, busy)
+
+TABLE: activity_log
+- id (UUID, primary key)
+- event_id (UUID, foreign key, nullable)
+- user_id (UUID, foreign key)
+- action (VARCHAR)
+- details (JSONB)
+- timestamp (TIMESTAMP)
+
+TABLE: alerts
+- id (UUID, primary key)
+- event_id (UUID, foreign key)
+- user_id (UUID, foreign key)
+- alert_type (ENUM: email, sms, push)
+- sent_at (TIMESTAMP)
+- status (ENUM: pending, sent, failed)
+
+
+### 10.3 CACHING & PERFORMANCE (Backend)
+**Why:** Thousands of requests per minute need fast responses.
+
+**What to Add:**
+- Redis cache for frequently accessed data
+  - Cache event lists (5-minute TTL)
+  - Cache statistics (1-minute TTL)
+  - Cache user sessions
+- CDN for static assets (CSS, JS, images)
+- Database indexing (event_id, location, detected_at, status)
+- Connection pooling (PostgreSQL)
+
+**Backend Implementation:**
+- Use Redis for: event lists, statistics, predictions
+- Invalidate cache when data changes
+- Serve static files from CDN (CloudFront, Cloudflare)
+
+
+### 10.4 SECURITY HARDENING
+**Why:** Production system needs enterprise-level security.
+
+**What to Add:**
+- HTTPS only (TLS 1.3)
+- JWT authentication with refresh tokens
+- Role-based access control (RBAC)
+- Rate limiting (100 requests/min per user)
+- Input sanitization (prevent SQL injection, XSS)
+- CORS configuration (whitelist allowed origins)
+- API key authentication for external integrations
+- Audit logging (all API requests logged)
+- Password policies (min 8 chars, complexity requirements)
+- Two-factor authentication (2FA) for admin users
+
+**Backend Implementation:**
+- Use JWT tokens (access token 15 min, refresh token 7 days)
+- Validate all inputs with middleware
+- Use parameterized queries (no raw SQL)
+- CORS whitelist: only frontend domain allowed
+
+
+### 10.5 MONITORING & OBSERVABILITY
+**Why:** Know when system has issues, track performance.
+
+**What to Add:**
+- Application performance monitoring (APM)
+- Error tracking (Sentry, Rollbar)
+- Uptime monitoring (Pingdom, UptimeRobot)
+- Log aggregation (ELK stack: Elasticsearch, Logstash, Kibana)
+- Metrics dashboard (Grafana)
+- Alerting (PagerDuty, Opsgenie)
+
+**Metrics to Track:**
+- API response times (p50, p95, p99)
+- Error rates (4xx, 5xx)
+- Database query times
+- Active users count
+- Events processed per minute
+- Alert delivery success rate
+
+
+================================================================================
+IMPLEMENTATION PRIORITY MATRIX
+================================================================================
+
+PHASE 1 - IMMEDIATE (Next Sprint)
+Priority: CRITICAL
+Timeline: 1-2 weeks
+
+1. Real-time event streaming (WebSocket)
+2. User authentication & authorization
+3. Response coordination panel (status updates, team assignment)
+4. Weather integration
+5. Browser notifications
+
+PHASE 2 - SHORT-TERM (1-2 Months)
+Priority: HIGH
+Timeline: 1-2 months
+
+1. Historical heatmap & analytics
+2. Fire spread prediction visualization
+3. Priority scoring & triage system
+4. Advanced filtering & search
+5. Alerting system (email, SMS)
+6. Report generation & export
+
+PHASE 3 - MEDIUM-TERM (3-6 Months)
+Priority: MEDIUM
+Timeline: 3-6 months
+
+1. Mobile field officer features
+2. Event comparison & clustering
+3. Predictive risk modeling
+4. Audit trail & activity logging
+5. Time-series charts & trends
+6. Third-party integrations
+
+PHASE 4 - LONG-TERM (6-12 Months)
+Priority: NICE-TO-HAVE
+Timeline: 6-12 months
+
+1. Automated workflows
+2. Customizable dashboard layouts
+3. Advanced accessibility features
+4. Offline mode support
+5. Voice notes & photo uploads
+6. GraphQL API
+
+
+================================================================================
+COST ESTIMATION (Infrastructure)
+================================================================================
+
+MONTHLY COSTS (Rough Estimates for India deployment):
+
+1. Backend Hosting (AWS/Azure/GCP)
+   - Application server (EC2 t3.medium): ₹5,000
+   - Database (RDS PostgreSQL with PostGIS): ₹10,000
+   - Redis cache: ₹3,000
+
+2. APIs & Services
+   - Weather API (OpenWeatherMap): ₹2,000
+   - Satellite imagery (Sentinel Hub): ₹8,000
+   - SMS alerts (Twilio): ₹5,000
+   - Email service (SendGrid): ₹2,000
+
+3. Storage & CDN
+   - S3 storage (satellite images): ₹2,000
+   - CloudFront CDN: ₹3,000
+
+4. Monitoring & Security
+   - Error tracking (Sentry): ₹1,500
+   - Uptime monitoring: ₹1,000
+   - SSL certificate: Free (Let's Encrypt)
+
+5. Total Monthly: ~₹42,000 ($500 USD)
+
+SCALING COSTS (For nationwide deployment):
+- 10x traffic: ~₹150,000/month
+- 100x traffic: ~₹500,000/month (need dedicated infrastructure)
+
+
+================================================================================
+TECHNICAL STACK RECOMMENDATIONS
+================================================================================
+
+FRONTEND (Current - Keep as-is, enhance progressively):
+- HTML5 + CSS3 + Vanilla JavaScript
+- Leaflet.js for maps
+- Chart.js for charts (add later)
+- Service Workers for offline support
+
+BACKEND (Recommended):
+- Node.js + Express.js (or Python + FastAPI)
+- PostgreSQL 14+ with PostGIS extension
+- Redis for caching
+- JWT for authentication
+
+INFRASTRUCTURE:
+- Docker containers
+- Kubernetes for orchestration (if large scale)
+- Nginx reverse proxy
+- Let's Encrypt SSL
+
+APIS & INTEGRATIONS:
+- OpenWeatherMap (weather data)
+- Sentinel Hub (satellite imagery)
+- Twilio (SMS alerts)
+- SendGrid (email alerts)
+- Google Maps API (navigation)
+
+MONITORING:
+- Sentry (error tracking)
+- Grafana + Prometheus (metrics)
+- ELK stack (logs)
+- PagerDuty (alerting)
+
+
+================================================================================
+DEVELOPMENT TEAM REQUIREMENTS
+================================================================================
+
+MINIMUM TEAM (For Phase 1-2):
+- 1 Full-stack developer (backend + frontend)
+- 1 DevOps engineer (infrastructure)
+- 1 UI/UX designer (improvements)
+- 1 QA engineer (testing)
+- 1 Project manager
+
+FULL TEAM (For Phase 1-4):
+- 2 Backend developers (APIs, database)
+- 2 Frontend developers (UI, features)
+- 1 ML engineer (Stage 2 integration)
+- 1 DevOps engineer
+- 1 UI/UX designer
+- 2 QA engineers
+- 1 Security specialist
+- 1 Project manager
+
+TIMELINE ESTIMATE:
+- Phase 1: 4-6 weeks (with 5-person team)
+- Phase 2: 8-12 weeks
+- Phase 3: 12-16 weeks
+- Phase 4: 16-24 weeks
+
+Total: 10-14 months for full production system
+
+
+================================================================================
+TESTING REQUIREMENTS
+================================================================================
+
+TYPES OF TESTING NEEDED:
+
+1. Unit Testing
+   - Test each service function independently
+   - Target: 80%+ code coverage
+
+2. Integration Testing
+   - Test frontend ↔ backend API communication
+   - Test Stage 1/1B ↔ Stage 3 integration
+   - Test Stage 2 ML ↔ Stage 3 integration
+
+3. End-to-End Testing
+   - User flows: Login → View event → Assign team → Resolve
+   - Automation: Selenium, Playwright, Cypress
+
+4. Performance Testing
+   - Load testing: 1000 concurrent users
+   - Stress testing: Peak load scenarios
+   - Tools: JMeter, Gatling
+
+5. Security Testing
+   - Penetration testing
+   - OWASP Top 10 vulnerabilities check
+   - Tools: OWASP ZAP, Burp Suite
+
+6. Accessibility Testing
+   - WCAG 2.1 Level AA compliance
+   - Screen reader testing (NVDA, JAWS)
+   - Keyboard navigation testing
+
+7. Mobile Testing
+   - iOS Safari, Chrome
+   - Android Chrome, Firefox
+   - Different screen sizes
+
+8. Browser Testing
+   - Chrome, Firefox, Edge, Safari
+   - Different OS (Windows, Mac, Linux)
+
+
+================================================================================
+DEPLOYMENT STRATEGY
+================================================================================
+
+ENVIRONMENTS:
+
+1. Development
+   - Local machines
+   - Mock data enabled
+   - Debug mode on
+
+2. Staging
+   - Mirrors production setup
+   - Real APIs (test accounts)
+   - Used for QA testing
+
+3. Production
+   - Live system
+   - Real data
+   - High availability setup
+
+DEPLOYMENT PROCESS:
+
+1. Code Review → Approve
+2. Automated tests pass
+3. Deploy to staging
+4. QA team validates
+5. Deploy to production (blue-green deployment)
+6. Monitor for errors
+7. Rollback if issues
+
+CI/CD PIPELINE:
+- GitHub Actions / GitLab CI
+- Automated testing on each commit
+- Automated deployment to staging on merge to develop
+- Manual approval for production deployment
+
+
+================================================================================
+DOCUMENTATION REQUIREMENTS
+================================================================================
+
+WHAT TO CREATE:
+
+1. User Guide
+   - How to use each feature
+   - Screenshots and videos
+   - FAQ section
+
+2. Admin Guide
+   - User management
+   - System configuration
+   - Backup and recovery
+
+3. API Documentation
+   - All endpoints
+   - Request/response examples
+   - Authentication guide
+
+4. Developer Guide
+   - How to set up dev environment
+   - Code structure explanation
+   - Contribution guidelines
+
+5. Operations Manual
+   - Deployment procedures
+   - Monitoring setup
+   - Incident response procedures
+
+
+================================================================================
+COMPLIANCE & LEGAL
+================================================================================
+
+CONSIDER:
+
+1. Data Privacy
+   - GDPR compliance (if EU users)
+   - Personal data handling
+   - User consent for notifications
+
+2. Data Retention
+   - How long to keep event data
+   - Archive old events
+   - Data deletion requests
+
+3. Accessibility
+   - WCAG 2.1 compliance
+   - Section 508 (if US govt)
+
+4. Security Standards
+   - ISO 27001
+   - SOC 2 Type II
+   - Industry-specific standards
+
+
+================================================================================
+SUCCESS METRICS (KPIs)
+================================================================================
+
+MEASURE SUCCESS BY:
+
+1. Response Time Improvement
+   - Before system: Average 45 minutes from detection to team dispatch
+   - Target: < 15 minutes
+
+2. Event Detection Rate
+   - Increase in fire events detected early (before major damage)
+
+3. User Adoption
+   - Number of active users
+   - Daily/weekly active users
+   - User satisfaction score
+
+4. System Reliability
+   - Uptime: 99.9% target
+   - API response time: < 200ms
+   - Zero critical bugs in production
+
+5. Cost Savings
+   - Reduction in fire damage costs
+   - Reduction in response costs
+
+
+================================================================================
+CONCLUSION & NEXT STEPS
+================================================================================
+
+IMMEDIATE ACTION ITEMS:
+
+1. Review this document with your team
+2. Prioritize features based on user needs
+3. Get budget approval for infrastructure
+4. Assemble development team
+5. Set up development environment
+6. Start Phase 1 implementation
+
+QUESTIONS TO ANSWER:
+
+1. Who are the primary users? (Fire departments, forest dept, industrial safety?)
+2. What is the geographic scope? (City, state, nationwide?)
+3. What is the expected scale? (Events per day, concurrent users)
+4. What integrations are mandatory? (Existing systems to connect)
+5. What is the budget? (Development + infrastructure)
+6. What is the timeline? (Launch date, phase deadlines)
+
+CONTACT FOR IMPLEMENTATION SUPPORT:
+
+Once you have answers to the questions above, you can:
+- Hire a development team
+- Contract with a software agency
+- Use this document as RFP (Request for Proposal) for vendors
+- Start implementing in-house
+
+================================================================================
+END OF DOCUMENT
+================================================================================
+
+Last Updated: August 26, 2026
+Document Version: 1.0
+Status: Ready for Review

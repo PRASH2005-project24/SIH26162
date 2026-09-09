@@ -1,0 +1,24 @@
+{
+  "validation_accuracy": 0.9249514697726012,
+  "validation_macro_f1": 0.9199289084302302,
+  "validation_per_class": {
+    "agricultural": {
+      "precision": 0.9149688343101684,
+      "recall": 0.9248636449125447,
+      "f1": 0.919889631950615,
+      "support": 10634
+    },
+    "industrial": {
+      "precision": 0.9642026964202697,
+      "recall": 0.8505228624154193,
+      "f1": 0.903802157097723,
+      "support": 4877
+    },
+    "wildfire": {
+      "precision": 0.920489961585852,
+      "recall": 0.9522381345130089,
+      "f1": 0.9360949362423527,
+      "support": 13337
+    }
+  }
+}

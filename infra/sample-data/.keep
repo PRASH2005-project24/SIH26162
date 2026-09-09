@@ -1,0 +1,7 @@
+# Place historical FIRMS CSV files here for import in Stage 1B
+# Example: india_firms_historical.csv
+
+# Format expected:
+# latitude,longitude,brightness,frp,confidence,acq_date,acq_time,satellite,instrument,scan,track,day_night
+
+# This directory is gitignored; CSV files are not committed.

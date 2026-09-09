@@ -1,0 +1,50 @@
+STAGE 2D.6.1 — TEMPORAL LEAKAGE REMEDIATION & FULL REBUILD
+===========================================================
+
+OBJECTIVE: Remediate temporal leakage in weak label generation and rebuild pipeline
+
+ROOT CAUSE: Persistence features computed using all data (not historical ≤ event time)
+
+KEY FIXES:
+1. Fixed weak label generation (generate_weak_labels_final_fixed.py)
+   - Groups by lat/lon, processes chronologically
+   - Uses only historical data for each observation
+2. Regenerated weak labels (FireGuard_WEAKLABELS_FIXED.csv)
+3. Prepared dataset (prepare_stage2d_dataset_from_fixed_labels.py)
+4. Spatial split (create_spatial_split_final.py) - 0.2° blocking
+5. Updated feature schema
+6. Retrained final model (train_final_model.py)
+
+TEMPORAL TEST: [PASS] No leakage detected in sample test
+
+FINAL PERFORMANCE (untouched TEST set):
+- Test Accuracy: 0.9338
+- Test Macro F1: 0.9154
+- Per-class F1:
+  - Agricultural: 0.9308
+  - Industrial: 0.8685
+  - Wildfire: 0.9468
+
+ARTIFACTS SAVED:
+- final_model.joblib
+- preprocessing_pipeline.joblib
+- label_encoder.joblib
+- feature_schema.json
+- model_metadata.json
+
+LEAKAGE AUDIT: All sources eliminated
+- Target leakage: ✓ (dw_label, snpp_anomaly_flag excluded)
+- Temporal leakage: ✓ (fixed in label generation)
+- Spatial leakage: ✓ (0.2° blocking, no overlap)
+- Preprocessing leakage: ✓ (fitted on train only)
+- Feature availability: ✓ (all 15 features from live pipeline)
+- Training-to-live contract: ✓
+
+SIH FIVE-CATEGORY HANDLING: ✓
+1. Industrial Fire
+2. Agricultural Fire
+3. Wildfire/Natural Fire
+4. Persistent Thermal Source (post-processing)
+5. Unknown/Other
+
+STATUS: STAGE 2D.6.1 COMPLETE — TEMPORAL LEAKAGE REMEDIATED AND FULL REBUILD SUCCESSFUL

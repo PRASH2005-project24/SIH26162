@@ -1,0 +1,52 @@
+{
+  "input_rows": 673132,
+  "output_rows": 673132,
+  "class_counts": {
+    "unknown": 496539,
+    "wildfire": 87772,
+    "agricultural": 67470,
+    "industrial": 21351
+  },
+  "conf_level_counts": {
+    "low": 496539,
+    "high": 176593,
+    "medium": 0
+  },
+  "conflict_count": 0,
+  "persistent_count": 78,
+  "persistence_stats": {
+    "persistence_date_count_mean": 1.0001158762322993,
+    "persistence_date_count_max": 2,
+    "time_span_days_mean": 0.011526713928323122,
+    "time_span_days_max": 251,
+    "detections_24h_mean": 1.0,
+    "detections_24h_max": 1,
+    "active_days_mean": 1.0001158762322993,
+    "active_days_max": 2,
+    "persistence_duration_days_mean": 0.011526713928323122,
+    "persistence_duration_days_max": 251,
+    "mean_frp_mean": 6.685739216082432,
+    "mean_frp_max": 1333.95,
+    "max_frp_mean": 6.6858592816862075,
+    "max_frp_max": 1333.95
+  },
+  "missing_counts": {
+    "target_class": 0,
+    "label_confidence": 0,
+    "label_confidence_level": 0,
+    "label_evidence": 0,
+    "label_conflict": 0,
+    "is_persistent": 0,
+    "persistence_date_count": 0,
+    "time_span_days": 0,
+    "detections_24h": 0,
+    "detections_3d": 0,
+    "detections_7d": 0,
+    "active_days": 0,
+    "persistence_duration_days": 0,
+    "mean_frp": 0,
+    "max_frp": 0,
+    "label_source": 0,
+    "is_ground_truth": 0
+  }
+}

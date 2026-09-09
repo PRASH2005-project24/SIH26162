@@ -1,0 +1,68 @@
+# ============================================================================
+# SIH26162 Backend Dependencies
+# Stage 1A: FIRMS Ingestion with Geospatial Fusion
+# Stage 2: ML Pipeline
+# ============================================================================
+
+# Web Framework
+fastapi>=0.100
+uvicorn[standard]>=0.23
+pydantic>=2.4
+python-multipart>=0.0.6
+
+# Database
+sqlalchemy>=2.0
+asyncpg>=0.29
+psycopg2-binary>=2.9
+alembic>=1.12
+
+# HTTP Client
+aiohttp>=3.9
+requests>=2.31
+
+# Geospatial
+shapely>=2.0
+pyproj>=3.6
+
+# Date/Time
+python-dateutil>=2.8
+
+# Logging and Monitoring
+python-json-logger>=2.0
+
+# Environment
+python-dotenv>=1.0
+
+# Development/Testing (optional)
+pytest>=7.4
+pytest-asyncio>=0.21
+pytest-cov>=4.1
+httpx>=0.25
+
+# Type hints
+typing-extensions>=4.8
+
+# CORS
+fastapi-cors>=0.0.6
+
+# ============================================================================
+# Stage 2: ML Pipeline Dependencies
+# ============================================================================
+
+# Data processing
+pandas>=2.0
+numpy>=1.24
+
+# Machine Learning
+scikit-learn>=1.3
+joblib>=1.3
+
+# XGBoost (optional GPU support)
+xgboost>=2.0
+
+# Visualization (optional)
+matplotlib>=3.7
+seaborn>=0.12
+
+# Class imbalance handling
+imbalanced-learn>=0.11

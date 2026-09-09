@@ -1,0 +1,226 @@
+Verifying dataset...
+File exists: True
+File size: 313.03 MB
+
+Columns: ['fire_id', 'latitude', 'longitude', 'bright_ti4', 'scan', 'track', 'acq_date', 'acq_time', 'satellite', 'instrument', 'confidence', 'version', 'bright_ti5', 'frp', 'daynight', 'source_satellite', 'source_file', 'acq_datetime', 'shapeName', 'shapeISO', 'shapeID', 'shapeGroup', 'shapeType', 'snpp_anomaly_flag', 'nearest_facility_latitude', 'nearest_facility_longitude', 'nearest_facility_name', 'nearest_facility_category', 'nearest_facility_distance_km', 'nearest_osm_id', 'facility_within_1km', 'facility_within_5km', 'facility_within_10km', 'dw_bare', 'dw_built', 'dw_confidence', 'dw_crops', 'dw_date', 'dw_difference', 'dw_flooded_vegetation', 'dw_found', 'dw_grass', 'dw_label', 'dw_shrub_and_scrub', 'dw_snow_and_ice', 'dw_trees', 'dw_water']
+
+Data types from sample:
+fire_id                             str
+latitude                        float64
+longitude                       float64
+bright_ti4                      float64
+scan                            float64
+track                           float64
+acq_date                            str
+acq_time                          int64
+satellite                           str
+instrument                          str
+confidence                          str
+version                             str
+bright_ti5                      float64
+frp                             float64
+daynight                            str
+source_satellite                    str
+source_file                         str
+acq_datetime                        str
+shapeName                           str
+shapeISO                            str
+shapeID                             str
+shapeGroup                          str
+shapeType                           str
+snpp_anomaly_flag                  bool
+nearest_facility_latitude       float64
+nearest_facility_longitude      float64
+nearest_facility_name               str
+nearest_facility_category           str
+nearest_facility_distance_km    float64
+nearest_osm_id                    int64
+facility_within_1km               int64
+facility_within_5km               int64
+facility_within_10km              int64
+dw_bare                         float64
+dw_built                        float64
+dw_confidence                   float64
+dw_crops                        float64
+dw_date                             str
+dw_difference                   float64
+dw_flooded_vegetation           float64
+dw_found                          int64
+dw_grass                        float64
+dw_label                        float64
+dw_shrub_and_scrub              float64
+dw_snow_and_ice                 float64
+dw_trees                        float64
+dw_water                        float64
+dtype: object
+
+Getting unique facility categories from a sample...
+Unique facility categories (non-null): <StringArray>
+[            'fuel',      'power_plant',    'manufacturing',
+           'mining', 'refinery_oil_gas',      'steel_metal',
+           'cement',         'chemical']
+Length: 8, dtype: str
+Number of unique facility categories: 8
+Unique dw_label values: [1. 5. 4. 6. 2. 7. 3. 0. 8.]
+
+=== PASS 1: Overall statistics ===
+  Processed 50000 rows...
+  Processed 550000 rows...
+
+Total rows processed: 673132
+
+=== Numerical Feature Statistics ===
+frp: count=673132, missing=0, mean=6.6858, std=13.8574, min=0.0000, max=1333.9500
+bright_ti4: count=673132, missing=0, mean=331.1148, std=16.7781, min=207.3800, max=367.0000
+bright_ti5: count=673132, missing=0, mean=301.4157, std=9.6742, min=248.9900, max=374.3700
+scan: count=673132, missing=0, mean=0.4529, std=0.0821, min=0.3200, max=0.8000
+track: count=673132, missing=0, mean=0.4716, std=0.1099, min=0.3600, max=0.7800
+latitude: count=673132, missing=0, mean=22.1454, std=4.4281, min=8.1265, max=35.9915
+longitude: count=673132, missing=0, mean=80.6079, std=4.9159, min=68.5377, max=97.1115
+nearest_facility_distance_km: count=673132, missing=0, mean=13.6437, std=12.0320, min=0.0015, max=150.5622
+nearest_osm_id: count=673132, missing=0, mean=4311271672.1135, std=0.0000, min=5908934.0000, max=14114670818.0000
+facility_within_1km: count=673132, missing=0, mean=0.0583, std=0.2343, min=0.0000, max=1.0000
+facility_within_5km: count=673132, missing=0, mean=0.2844, std=0.4511, min=0.0000, max=1.0000
+facility_within_10km: count=673132, missing=0, mean=0.4854, std=0.4998, min=0.0000, max=1.0000
+dw_bare: count=635332, missing=37800, mean=0.1207, std=0.1320, min=0.0167, max=0.6898
+dw_built: count=635332, missing=37800, mean=0.0793, std=0.1345, min=0.0131, max=0.8051
+dw_confidence: count=635332, missing=37800, mean=0.5214, std=0.1080, min=0.1479, max=0.8051
+dw_crops: count=635332, missing=37800, mean=0.2204, std=0.2394, min=0.0113, max=0.7556
+dw_difference: count=635332, missing=37800, mean=6.3320, std=3.6079, min=0.0007, max=12.2590
+dw_flooded_vegetation: count=635332, missing=37800, mean=0.0394, std=0.0415, min=0.0118, max=0.7103
+dw_grass: count=635332, missing=37800, mean=0.0557, std=0.0452, min=0.0115, max=0.6661
+dw_label: count=635332, missing=37800, mean=3.8524, std=2.1150, min=0.0000, max=8.0000
+dw_shrub_and_scrub: count=635332, missing=37800, mean=0.1740, std=0.1453, min=0.0142, max=0.6552
+dw_snow_and_ice: count=635332, missing=37800, mean=0.0572, std=0.0689, min=0.0134, max=0.7398
+dw_trees: count=635332, missing=37800, mean=0.1951, std=0.2248, min=0.0102, max=0.7855
+dw_water: count=635332, missing=37800, mean=0.0579, std=0.0757, min=0.0119, max=0.7705
+
+=== Categorical Feature Statistics (top 5) ===
+satellite: missing=0, unique values=2
+  Top 5: [('N21', 650956), ('N20', 22176)]
+instrument: missing=0, unique values=1
+  Top 5: [('VIIRS', 673132)]
+confidence: missing=0, unique values=3
+  Top 5: [('n', 532672), ('l', 121225), ('h', 19235)]
+version: missing=0, unique values=1
+  Top 5: [('2.0NRT', 673132)]
+daynight: missing=0, unique values=2
+  Top 5: [('D', 473052), ('N', 200080)]
+nearest_facility_category: missing=0, unique values=8
+  Top 5: [('fuel', 330134), ('power_plant', 213562), ('manufacturing', 99146), ('mining', 19401), ('steel_metal', 6957)]
+nearest_facility_name: missing=370057, unique values=3416
+  Top 5: [('Indian Oil', 40791), ('Bharat Petroleum', 14063), ('HP', 11945), ('Indian Oil Petrol Pump', 7096), ('Petrol Pump', 3979)]
+source_satellite: missing=0, unique values=2
+  Top 5: [('NOAA21', 650956), ('NOAA20', 22176)]
+source_file: missing=0, unique values=90
+  Top 5: [('NOAA21_20260412_20260416.csv', 39313), ('NOAA21_20260422_20260426.csv', 37656), ('NOAA21_20260417_20260421.csv', 31937), ('NOAA21_20260303_20260307.csv', 29039), ('NOAA21_20260313_20260317.csv', 26268)]
+shapeName: missing=0, unique values=1
+  Top 5: [('India', 673132)]
+shapeISO: missing=0, unique values=1
+  Top 5: [('IND', 673132)]
+shapeID: missing=0, unique values=1
+  Top 5: [('92124544B96439668485887', 673132)]
+shapeGroup: missing=0, unique values=1
+  Top 5: [('IND', 673132)]
+shapeType: missing=0, unique values=1
+  Top 5: [('ADM0', 673132)]
+
+Date range for acq_datetime: 2025-08-25 08:28:00 to 2026-08-24 08:09:00
+
+=== PASS 2: Facility Category Analysis ===
+Facility categories to analyze: ['fuel', 'power_plant', 'manufacturing', 'mining', 'refinery_oil_gas', 'steel_metal', 'cement', 'chemical']
+  Processed 673132 rows for facility stats...
+  Processed 673132 rows for facility stats...
+
+=== Facility Category Statistics ===
+
+Category: fuel (row count: 330134)
+  nearest_facility_distance_km: count=330134, mean=14.4823, std=11.7620, min=0.0078, max=148.4499
+  frp: count=330134, mean=6.7135, std=12.1266, min=0.0000, max=722.1100
+  dw_built: count=313552, mean=0.0693, std=0.1199, min=0.0131, max=0.7879
+  dw_crops: count=313552, mean=0.2356, std=0.2434, min=0.0125, max=0.7527
+  dw_trees: count=313552, mean=0.2089, std=0.2287, min=0.0114, max=0.7798
+
+Category: power_plant (row count: 213562)
+  nearest_facility_distance_km: count=213562, mean=14.6227, std=13.2013, min=0.0015, max=150.5622
+  frp: count=213562, mean=7.4288, std=18.2625, min=0.0000, max=1333.9500
+  dw_built: count=201202, mean=0.0782, std=0.1322, min=0.0142, max=0.8051
+  dw_crops: count=201202, mean=0.2149, std=0.2369, min=0.0113, max=0.7556
+  dw_trees: count=201202, mean=0.1931, std=0.2260, min=0.0102, max=0.7855
+
+Category: manufacturing (row count: 99146)
+  nearest_facility_distance_km: count=99146, mean=10.5557, std=9.6753, min=0.0047, max=59.7319
+  frp: count=99146, mean=5.7552, std=8.8242, min=0.1000, max=574.7200
+  dw_built: count=93175, mean=0.0952, std=0.1545, min=0.0145, max=0.7780
+  dw_crops: count=93175, mean=0.2236, std=0.2417, min=0.0128, max=0.7365
+  dw_trees: count=93175, mean=0.1703, std=0.2121, min=0.0139, max=0.7843
+
+Category: mining (row count: 19401)
+  nearest_facility_distance_km: count=19401, mean=7.6960, std=9.1134, min=0.1123, max=62.6288
+  frp: count=19401, mean=3.8396, std=3.8588, min=0.2100, max=131.6600
+  dw_built: count=17756, mean=0.1313, std=0.1769, min=0.0145, max=0.7709
+  dw_crops: count=17756, mean=0.0630, std=0.1031, min=0.0120, max=0.7034
+  dw_trees: count=17756, mean=0.1338, std=0.1908, min=0.0153, max=0.7701
+
+Category: refinery_oil_gas (row count: 1443)
+  nearest_facility_distance_km: count=1443, mean=10.1934, std=9.2824, min=0.0220, max=33.1830
+  frp: count=1443, mean=6.1477, std=8.2211, min=0.2700, max=122.0600
+  dw_built: count=1326, mean=0.1734, std=0.2494, min=0.0190, max=0.7764
+  dw_crops: count=1326, mean=0.0999, std=0.1424, min=0.0204, max=0.7340
+  dw_trees: count=1326, mean=0.2563, std=0.2455, min=0.0187, max=0.7594
+
+Category: steel_metal (row count: 6957)
+  nearest_facility_distance_km: count=6957, mean=4.8544, std=7.9605, min=0.0308, max=43.8742
+  frp: count=6957, mean=3.7281, std=3.8049, min=0.1600, max=117.2400
+  dw_built: count=6079, mean=0.1915, std=0.2249, min=0.0165, max=0.7616
+  dw_crops: count=6079, mean=0.0794, std=0.1372, min=0.0125, max=0.6977
+  dw_trees: count=6079, mean=0.0962, std=0.1422, min=0.0179, max=0.7625
+
+Category: cement (row count: 1443)
+  nearest_facility_distance_km: count=1443, mean=14.3828, std=15.7057, min=0.0190, max=69.8988
+  frp: count=1443, mean=8.0951, std=23.6470, min=0.2600, max=313.2100
+  dw_built: count=1242, mean=0.1809, std=0.2319, min=0.0182, max=0.7717
+  dw_crops: count=1242, mean=0.1222, std=0.1769, min=0.0146, max=0.6967
+  dw_trees: count=1242, mean=0.2405, std=0.2647, min=0.0153, max=0.7669
+
+Category: chemical (row count: 1046)
+  nearest_facility_distance_km: count=1046, mean=14.3222, std=10.7127, min=0.0099, max=48.8840
+  frp: count=1046, mean=5.6639, std=6.5926, min=0.2300, max=60.8300
+  dw_built: count=1000, mean=0.1277, std=0.1925, min=0.0187, max=0.7484
+  dw_crops: count=1000, mean=0.2065, std=0.2309, min=0.0153, max=0.7214
+  dw_trees: count=1000, mean=0.1637, std=0.1828, min=0.0150, max=0.7500
+
+=== Dynamic World Label Analysis ===
+Overall dw_label: count=635332, missing=37800, mean=3.8524, std=2.1150, min=0.0000, max=8.0000
+  Processed 673132 rows for dw_label stats...
+  Processed 673132 rows for dw_label stats...
+
+=== Mean dw_label per Facility Category ===
+fuel: count=313552, mean dw_label=3.6543
+power_plant: count=201202, mean dw_label=3.8871
+manufacturing: count=93175, mean dw_label=4.0940
+mining: count=17756, mean dw_label=5.1149
+refinery_oil_gas: count=1326, mean dw_label=3.8039
+steel_metal: count=6079, mean dw_label=5.4409
+cement: count=1242, mean dw_label=4.0564
+chemical: count=1000, mean dw_label=4.2120
+
+=== dw_label value distribution (treating as categorical) ===
+  Processed 673132 rows for dw_label distribution...
+  Processed 673132 rows for dw_label distribution...
+dw_label distribution (rounded to 2 decimals):
+  0.0: 13570 (2.02%)
+  1.0: 163335 (24.26%)
+  2.0: 5966 (0.89%)
+  3.0: 4932 (0.73%)
+  4.0: 206173 (30.63%)
+  5.0: 112911 (16.77%)
+  6.0: 43603 (6.48%)
+  7.0: 72119 (10.71%)
+  8.0: 12723 (1.89%)
+  Processed 673132 rows for correlation matrix...
+Traceback (most recent call last):
+  File "C:\ProjectX\SIH26162\temp_analysis.py", line 433, in <module>
+    sums_prod[(f1, f2)] += prod_data.sum()
+    ~~~~~~~~~^^^^^^^^^^
+KeyError: ('frp', 'dw_built')

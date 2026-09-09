@@ -1,0 +1,89 @@
+{
+  "model_input_features": [
+    "bright_ti4",
+    "bright_ti5",
+    "scan",
+    "track",
+    "confidence",
+    "satellite",
+    "instrument",
+    "daynight",
+    "source_satellite",
+    "dw_bare",
+    "dw_confidence",
+    "dw_difference",
+    "dw_found",
+    "dw_grass",
+    "dw_water"
+  ],
+  "numeric_features": [
+    "bright_ti4",
+    "bright_ti5",
+    "scan",
+    "track",
+    "dw_bare",
+    "dw_confidence",
+    "dw_difference",
+    "dw_found",
+    "dw_grass",
+    "dw_water"
+  ],
+  "categorical_features": [
+    "confidence",
+    "satellite",
+    "instrument",
+    "daynight",
+    "source_satellite"
+  ],
+  "target_class": "target_class",
+  "target_classes": [
+    "industrial",
+    "agricultural",
+    "wildfire"
+  ],
+  "traceability_fields": [
+    "fire_id",
+    "nearest_facility_name",
+    "nearest_osm_id"
+  ],
+  "spatial_grouping_method": "Grid-based with size 0.2 degrees",
+  "spatial_group_column": "spatial_group",
+  "preprocessing_steps": {
+    "numeric": [
+      "median imputation",
+      "standardization (zero mean, unit variance)"
+    ],
+    "categorical": [
+      "most frequent imputation",
+      "one-hot encoding with handle_unknown='ignore'"
+    ]
+  },
+  "feature_counts_after_preprocessing": 20,
+  "split_sizes": {
+    "train": 122845,
+    "validation": 27854,
+    "test": 25894
+  },
+  "class_distribution_before_split": {
+    "wildfire": 87772,
+    "agricultural": 67470,
+    "industrial": 21351
+  },
+  "class_distribution_per_split": {
+    "train": {
+      "wildfire": 60345,
+      "agricultural": 48208,
+      "industrial": 14292
+    },
+    "validation": {
+      "wildfire": 13820,
+      "agricultural": 9653,
+      "industrial": 4381
+    },
+    "test": {
+      "wildfire": 13607,
+      "agricultural": 9609,
+      "industrial": 2678
+    }
+  }
+}

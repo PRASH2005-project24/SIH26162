@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+/* Leaflet core CSS */
+@import "leaflet/dist/leaflet.css";
+
+/* ================================================================
+   Tailwind v4 Theme – explicit tokens so all utility classes resolve
+   ================================================================ */
+@theme {
+  /* ---- Breakpoints ---- */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+  /* ---- Colors (full gray + brand palette) ---- */
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+  --color-gray-950: #030712;
+
+  --color-red-100: #fee2e2;
+  --color-red-400: #f87171;
+  --color-red-500: #ef4444;
+  --color-red-600: #dc2626;
+  --color-red-800: #991b1b;
+
+  --color-orange-100: #ffedd5;
+  --color-orange-500: #f97316;
+  --color-orange-800: #9a3412;
+
+  --color-yellow-100: #fef9c3;
+  --color-yellow-500: #eab308;
+  --color-yellow-800: #854d0e;
+
+  --color-green-400: #4ade80;
+  --color-green-500: #22c55e;
+  --color-green-600: #16a34a;
+
+  --color-blue-50: #eff6ff;
+  --color-blue-100: #dbeafe;
+  --color-blue-200: #bfdbfe;
+  --color-blue-400: #60a5fa;
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+  --color-blue-800: #1e40af;
+  --color-blue-900: #1e3a5f;
+
+  --color-indigo-600: #4f46e5;
+
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-transparent: transparent;
+}
+
+/* ================================================================
+   Global base styles
+   ================================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* ================================================================
+   Leaflet overrides – ensure map fills its container
+   ================================================================ */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  border-radius: 0.5rem;
+}
+
+/* Fix Leaflet tile rendering */
+.leaflet-tile-pane {
+  z-index: 1;
+}
+
+/* ================================================================
+   Event marker styles
+   ================================================================ */
+.event-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.event-marker.industrial-fire {
+  color: #dc2626;
+  background: rgba(254, 226, 226, 0.9);
+}
+
+.event-marker.wildfire---natural-fire {
+  color: #f97316;
+  background: rgba(255, 237, 213, 0.9);
+}
+
+.event-marker.agricultural-fire {
+  color: #eab308;
+  background: rgba(254, 249, 195, 0.9);
+}
+
+.event-marker.persistent-thermal-source {
+  color: #3b82f6;
+  background: rgba(219, 234, 254, 0.9);
+}
+
+.event-marker.unknown---other {
+  color: #6b7280;
+  background: rgba(243, 244, 246, 0.9);
+}
+
+/* ================================================================
+   Scrollbar styling (subtle)
+   ================================================================ */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
