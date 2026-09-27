@@ -1,6 +1,10 @@
 /**
  * Normalized Frontend Data Contract
- * Derived directly from frontend/frontend_requirements.md
+ * Derived from SIH26162 requirements — strictly backend-supported fields only.
+ *
+ * ML prediction = 3 source classes (industrial, wildfire, agricultural)
+ * SIH classification = 5 categories (Industrial Fire, Wildfire / Natural Fire,
+ *   Agricultural Fire, Persistent Thermal Source, Unknown / Other)
  */
 
 export interface EventLocation {
@@ -12,10 +16,14 @@ export interface EventLocation {
 export interface IndustrialContext {
   nearby_facilities: string;
   osm_proximity: string;
+  inside_industrial_zone?: boolean;
+  nearest_feature_distance_m?: number;
+  feature_count_1km?: number;
 }
 
 export interface WaterContext {
   proximity: string;
+  nearby_water?: boolean;
 }
 
 export interface LandCoverBreakdown {
@@ -45,10 +53,11 @@ export interface KeyFactor {
 
 export interface NormalizedPrediction {
   event_id: string;
+  /** SIH 5-class classification */
   predicted_class: string;
   confidence: number;
-  risk_score: number;
-  risk_level: 'critical' | 'high' | 'moderate' | 'low';
+  /** ML 3-class raw probabilities */
+  ml_probabilities?: Record<string, number>;
   model_version: string;
   key_factors: KeyFactor[];
 }
@@ -58,45 +67,55 @@ export interface NormalizedEvent {
   latitude: number;
   longitude: number;
   location: EventLocation;
+
+  /** SIH 5-category classification */
   classification: string;
-  risk_score: number;
-  risk_level: 'critical' | 'high' | 'moderate' | 'low';
+  /** ML 3-class prediction confidence (0–1) */
   confidence: number;
-  frp: number;
+
+  // FIRMS thermal data
+  frp: number | null;
+  brightness: number | null;
+  satellite_name: string;
+  instrument?: string;
+  day_night: string | null;
+  acquisition_time: string;
+
+  // Enrichment layers
   persistence: string;
+  persistence_details?: {
+    is_persistent: boolean;
+    date_count: number;
+    duration_days: number;
+  };
   industrial_context: IndustrialContext;
   water_context: WaterContext;
-  land_cover: LandCoverBreakdown;
+  land_cover: LandCoverBreakdown | null;
   satellite: SatelliteInfo;
+
+  // Marker color (by SIH category)
   color: string;
+
   prediction?: NormalizedPrediction;
   raw?: any;
 
   // Backwards-compatible aliases
   id?: string;
-  acquisition_time?: string;
   status?: string;
   pipeline_version?: string;
   processed_at?: string;
-  brightness?: number | null;
-  satellite_name?: string;
-  day_night?: string | null;
 }
 
 export interface NormalizedStatistics {
   totalDetections: number;
   industrialCount: number;
-  highRiskCount: number;
-  lowRiskCount: number;
-  averageRiskScore: number;
+  averageConfidence: number;
+  averageFrp: number;
   demoMode: boolean;
 
-  // Snake_case aliases per requirements
+  // Snake_case aliases
   total_detections?: number;
   industrial_count?: number;
-  high_risk_count?: number;
-  low_risk_count?: number;
-  average_risk_score?: number;
 
   // Extended analytics fields
   timestamp?: string;

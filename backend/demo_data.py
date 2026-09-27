@@ -60,33 +60,46 @@ def generate_mock_events(count: int = 50, config: Config = None) -> List[Dict]:
     events = []
     base_time = datetime.utcnow() - timedelta(days=7)
 
-    # Industrial hotspots across India (mock locations)
-    hotspots = [
+    from backend.gis.boundary import is_point_in_india
+
+    # Industrial, forest, and agricultural anchor zones across India
+    indian_anchors = [
         {"name": "Pimpri Industrial Area, Pune", "lat": 18.6298, "lon": 73.8007},
         {"name": "Vadodara Industrial Zone, Gujarat", "lat": 22.3072, "lon": 73.1812},
         {"name": "Gurgaon Industrial Area, Haryana", "lat": 28.4595, "lon": 77.0266},
         {"name": "Coimbatore Industrial Zone, Tamil Nadu", "lat": 11.0168, "lon": 76.9558},
         {"name": "Howrah Industrial Belt, West Bengal", "lat": 22.5964, "lon": 88.2631},
+        {"name": "Ludhiana Agricultural Belt, Punjab", "lat": 30.9010, "lon": 75.8573},
+        {"name": "Karnal Farm Zone, Haryana", "lat": 29.6857, "lon": 76.9905},
+        {"name": "Singrauli Thermal Belt, MP", "lat": 24.1997, "lon": 82.6645},
+        {"name": "Jharia Coal Belt, Jharkhand", "lat": 23.7418, "lon": 86.4137},
+        {"name": "Visakhapatnam Industrial Corridor, AP", "lat": 17.6868, "lon": 83.2185},
+        {"name": "Bandipur Forest Fringe, Karnataka", "lat": 11.6664, "lon": 76.6293},
+        {"name": "Simlipal Forest Reserve, Odisha", "lat": 21.8540, "lon": 86.3400},
+        {"name": "Kanpur Industrial Hub, UP", "lat": 26.4499, "lon": 80.3319},
+        {"name": "Nashik MIDC, Maharashtra", "lat": 19.9975, "lon": 73.7898},
     ]
 
     for i in range(count):
-        # Mix hotspot events with random scatter
-        if i % 4 == 0 and hotspots:
-            hotspot = random.choice(hotspots)
-            lat = hotspot["lat"] + random.uniform(-0.01, 0.01)
-            lon = hotspot["lon"] + random.uniform(-0.01, 0.01)
-            event_name = hotspot["name"]
-        else:
-            lat = random.uniform(min_lat, max_lat)
-            lon = random.uniform(min_lon, max_lon)
-            event_name = f"Random event {i}"
+        anchor = random.choice(indian_anchors)
+        # Scatter within reasonable radius of real Indian hubs and verify boundary
+        lat = anchor["lat"] + random.uniform(-0.4, 0.4)
+        lon = anchor["lon"] + random.uniform(-0.4, 0.4)
+        while not is_point_in_india(lat, lon):
+            lat = anchor["lat"] + random.uniform(-0.1, 0.1)
+            lon = anchor["lon"] + random.uniform(-0.1, 0.1)
 
-        # Acquisition time: spread over past week
-        acq_time = base_time + timedelta(hours=random.randint(0, 168))
+        event_name = f"{anchor['name']} region {i}"
+
+        # Half events are Live (within last 1–12 hours), half are spread over past week
+        if i % 2 == 0:
+            acq_time = datetime.utcnow() - timedelta(hours=random.uniform(0.8, 11.5))
+        else:
+            acq_time = base_time + timedelta(hours=random.randint(0, 168))
 
         brightness = random.uniform(280, 380)  # Kelvin
         frp = random.uniform(5, 150)  # Megawatts
-        confidence = random.choice([30, 60, 80])
+        confidence = random.choice([70, 80, 85, 90, 95])
 
         event = {
             "id": str(uuid4()),
@@ -117,7 +130,7 @@ async def _insert_demo_event(db: Database, event: Dict, run_id: str):
             id, acquisition_time, satellite, instrument,
             brightness, brightness_rad, frp, confidence,
             scan, track, day_night,
-            latitude, longitude,
+            latitude, longitude, point,
             pipeline_version, ingestion_run_id,
             status
         ) VALUES (
@@ -125,6 +138,7 @@ async def _insert_demo_event(db: Database, event: Dict, run_id: str):
             :brightness, :brightness_rad, :frp, :confidence,
             :scan, :track, :day_night,
             :latitude, :longitude,
+            ST_GeomFromText(:point, 4326),
             :pipeline_version, :ingestion_run_id,
             'active'
         )
@@ -145,6 +159,7 @@ async def _insert_demo_event(db: Database, event: Dict, run_id: str):
         "day_night": event["day_night"],
         "latitude": event["latitude"],
         "longitude": event["longitude"],
+        "point": f"POINT({event['longitude']} {event['latitude']})",
         "pipeline_version": event["pipeline_version"],
         "ingestion_run_id": run_id,
     })

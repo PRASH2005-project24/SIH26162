@@ -35,7 +35,7 @@ export const DashboardPlaceholder = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-4">System Status</h2>
           <p className="text-gray-500">
-            Live/Demo/Offline indicators and backend health
+            Live/Offline indicators and backend health
           </p>
         </div>
         <div className="bg-white rounded-lg shadow p-6">

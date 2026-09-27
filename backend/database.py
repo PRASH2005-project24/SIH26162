@@ -231,7 +231,9 @@ async def init_db(db: Database):
         migration_files = [
             "00_init_schema.sql",
             "01_spatial_indexes.sql",
-            "02_classifications.sql"
+            "02_classifications.sql",
+            "03_historical_data.sql",
+            "04_classifier_feature_contract.sql"
         ]
 
         # Execute each migration file
@@ -270,7 +272,14 @@ async def init_db(db: Database):
                     cursor = conn.cursor()
 
                     try:
-                        # Split on semicolons, track $$ blocks
+                        # Helper to check if a statement contains actual SQL commands (not only comments)
+                        def has_executable_sql(s: str) -> bool:
+                            for l in s.split('\n'):
+                                cleaned = l.strip()
+                                if cleaned and not cleaned.startswith('--'):
+                                    return True
+                            return False
+
                         statements = []
                         current = []
                         in_dollar = False
@@ -281,13 +290,13 @@ async def init_db(db: Database):
                             current.append(line)
                             if ';' in line and not in_dollar:
                                 stmt = '\n'.join(current).strip()
-                                if stmt and not stmt.startswith('--'):
+                                if stmt and has_executable_sql(stmt):
                                     statements.append(stmt)
                                 current = []
 
                         if current:
                             stmt = '\n'.join(current).strip()
-                            if stmt and not stmt.startswith('--'):
+                            if stmt and has_executable_sql(stmt):
                                 statements.append(stmt)
 
                         # Execute each statement individually
@@ -331,11 +340,11 @@ async def init_db(db: Database):
             logger.info(f"✓ Schema verification: found {len(verify_result)} key columns")
             # Check for PostGIS geometry
             geom_check = await db.execute("""
-                SELECT column_name, data_type
+                SELECT column_name, data_type, udt_name
                 FROM information_schema.columns
                 WHERE table_name = 'thermal_events' AND column_name = 'point'
             """)
-            if geom_check and 'geometry' in str(geom_check[0].get('data_type', '').lower()):
+            if geom_check and ('geometry' in str(geom_check[0].get('data_type', '')).lower() or 'geometry' in str(geom_check[0].get('udt_name', '')).lower()):
                 logger.info("✓ PostGIS geometry type confirmed on thermal_events.point")
             else:
                 logger.warning("⚠️  PostGIS geometry may not be properly configured")

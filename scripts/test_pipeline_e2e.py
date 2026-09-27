@@ -44,17 +44,18 @@ async def test_pipeline():
         INSERT INTO thermal_events (
             id, acquisition_time, satellite, instrument,
             brightness, brightness_rad, frp, confidence,
-            latitude, longitude,
+            latitude, longitude, point,
             ingestion_run_id, pipeline_version
         ) VALUES (
             :id, :acq_time, 'TEST-SAT', 'TEST-INST',
             320.0, 10.0, 15.0, 85,
             :lat, :lon,
+            ST_GeomFromText(:point, 4326),
             :run_id, '1.0.0'
         )
     """, {
         "id": test_event_id, "acq_time": acq_time,
-        "lat": lat, "lon": lon, "run_id": test_run_id
+        "lat": lat, "lon": lon, "point": f"POINT({lon} {lat})", "run_id": test_run_id
     })
     
     logger.info("✓ Inserted test thermal event")
@@ -99,18 +100,19 @@ async def test_pipeline():
         INSERT INTO thermal_events (
             id, acquisition_time, satellite, instrument,
             brightness, brightness_rad, frp, confidence,
-            latitude, longitude,
+            latitude, longitude, point,
             ingestion_run_id, pipeline_version
         ) VALUES (
             :id, :acq_time, 'TEST-SAT', 'TEST-INST',
             320.0, 10.0, 15.0, 85,
             :lat, :lon,
+            ST_GeomFromText(:point, 4326),
             :run_id, '1.0.0'
         )
     """, {
         "id": future_event_id, 
         "acq_time": datetime.utcnow() + timedelta(days=5),
-        "lat": lat, "lon": lon, "run_id": test_run_id
+        "lat": lat, "lon": lon, "point": f"POINT({lon} {lat})", "run_id": test_run_id
     })
     
     # Re-run persistence for the old event
@@ -133,18 +135,19 @@ async def test_pipeline():
         INSERT INTO thermal_events (
             id, acquisition_time, satellite, instrument,
             brightness, brightness_rad, frp, confidence,
-            latitude, longitude,
+            latitude, longitude, point,
             ingestion_run_id, pipeline_version
         ) VALUES (
             :id, :acq_time, 'TEST-SAT', 'TEST-INST',
             320.0, 10.0, 15.0, 85,
             :lat, :lon,
+            ST_GeomFromText(:point, 4326),
             :run_id, '1.0.0'
         )
     """, {
         "id": test_fail_id, 
         "acq_time": datetime.utcnow(),
-        "lat": lat, "lon": lon, "run_id": test_run_id
+        "lat": lat, "lon": lon, "point": f"POINT({lon} {lat})", "run_id": test_run_id
     })
     
     # Do NOT enrich, try to classify
@@ -156,7 +159,7 @@ async def test_pipeline():
         {"id": test_fail_id}
     )
     print("Provider Failure Isolation Result:", fail_res)
-    assert fail_res['classification_status'] in ['success', 'failed'], "Classification status should be handled"
+    assert fail_res['classification_status'] in ['success', 'failed', 'insufficient_data'], "Classification status should be handled"
     assert fail_res['final_sih_category'] is not None, "Should map to a category gracefully"
     logger.info("✓ Provider Failure Isolation verified")
     

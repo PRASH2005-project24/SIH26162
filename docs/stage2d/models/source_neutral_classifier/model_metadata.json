@@ -1,0 +1,45 @@
+{
+  "model_type": "RandomForestClassifier",
+  "model_version": "source-neutral-dw-v1",
+  "model_params": {
+    "n_estimators": 100,
+    "max_depth": 10,
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "training_rows_with_dw": 120260,
+  "validation_rows_with_dw": 28181,
+  "test_rows_with_dw": 25929,
+  "excluded_no_dw_training_rows": 1348,
+  "excluded_source_features": [
+    "satellite",
+    "source_satellite"
+  ],
+  "classes": [
+    "agricultural",
+    "industrial",
+    "wildfire"
+  ],
+  "test_accuracy_with_dw": 0.9354390836515099,
+  "test_macro_f1_with_dw": 0.9098773523330617,
+  "test_per_class_with_dw": {
+    "agricultural": {
+      "precision": 0.9342211460855528,
+      "recall": 0.9365833923333671,
+      "f1": 0.9354007778170614,
+      "support": 9887
+    },
+    "industrial": {
+      "precision": 0.8992555831265509,
+      "recall": 0.7964835164835165,
+      "f1": 0.8447552447552448,
+      "support": 2275
+    },
+    "wildfire": {
+      "precision": 0.9415083559491502,
+      "recall": 0.9575797196193797,
+      "f1": 0.9494760344268789,
+      "support": 13767
+    }
+  }
+}

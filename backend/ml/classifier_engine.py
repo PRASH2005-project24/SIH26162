@@ -14,7 +14,9 @@ import os
 logger = logging.getLogger(__name__)
 
 _PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-_STAGE2D_MODEL_DIR = os.path.join(_PROJECT_ROOT, "docs", "stage2d", "models")
+_STAGE2D_MODEL_DIR = os.path.join(
+    _PROJECT_ROOT, "docs", "stage2d", "models", "source_neutral_classifier"
+)
 
 class ClassifierEngine:
     """
@@ -51,14 +53,33 @@ class ClassifierEngine:
 
     async def _classify_and_persist(self, event_id: str) -> bool:
         """Classify a single event and store result."""
-        
+
         ml_prediction = None
         inference_error = None
+        persistence_info = await self._get_persistence_info(event_id)
+        classification_status = "success"
         
         if self.classifier:
             try:
                 # 1. Compute features
                 features_dict = await compute_features_from_event(event_id, self.db)
+
+                if features_dict.get("dw_found") != 1.0:
+                    inference_error = "Dynamic World probabilities unavailable; source class withheld"
+                    classification_status = "insufficient_data"
+                    sih_category = (
+                        "Persistent Thermal Source"
+                        if persistence_info and persistence_info.is_persistent
+                        else "Unknown / Other"
+                    )
+                    return await self._persist_classification(
+                        event_id=event_id,
+                        ml_prediction=None,
+                        persistence_info=persistence_info,
+                        sih_category=sih_category,
+                        inference_error=inference_error,
+                        classification_status=classification_status,
+                    )
                 
                 # 2. Run prediction
                 prediction_dict = self.classifier.predict(features_dict)
@@ -74,9 +95,6 @@ class ClassifierEngine:
                 logger.warning(f"Event {event_id}: {inference_error}")
         else:
             inference_error = "Classifier model not loaded"
-
-        # 3. Get persistence info
-        persistence_info = await self._get_persistence_info(event_id)
 
         # 4. Map to SIH Category
         sih_result = {
@@ -95,7 +113,8 @@ class ClassifierEngine:
             ml_prediction=ml_prediction,
             persistence_info=persistence_info,
             sih_category=sih_result["sih_category"],
-            inference_error=inference_error
+            inference_error=inference_error,
+            classification_status=classification_status,
         )
 
     async def _get_persistence_info(self, event_id: str) -> Optional[PersistenceResponse]:
@@ -173,11 +192,12 @@ class ClassifierEngine:
         ml_prediction: Optional[Dict],
         persistence_info: Optional[PersistenceResponse],
         sih_category: str,
-        inference_error: Optional[str]
+        inference_error: Optional[str],
+        classification_status: Optional[str] = None,
     ) -> bool:
         """Upsert classification results into event_classifications table."""
         
-        status = "failed" if inference_error else "success"
+        status = classification_status or ("failed" if inference_error else "success")
         
         query = """
             INSERT INTO event_classifications (

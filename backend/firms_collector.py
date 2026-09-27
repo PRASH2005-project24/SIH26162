@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 # FIRMS API endpoint (VIIRS-375m and MODIS-1km available)
 FIRMS_API_BASE = "https://firms.modaps.eosdis.nasa.gov/api/v1"
+FIRMS_SOURCES = ("VIIRS_NOAA20_NRT", "VIIRS_NOAA21_NRT", "VIIRS_SNPP_NRT")
 
 
 class FIRMSCollector:
@@ -31,6 +32,7 @@ class FIRMSCollector:
         self.db = db
         self.config = config
         self.polling_active = False
+        self._last_source_errors: List[str] = []
 
     async def poll_once(self) -> Dict:
         """
@@ -40,6 +42,7 @@ class FIRMSCollector:
         """
         run_id = str(uuid4())
         run_start = datetime.utcnow()
+        self._last_source_errors = []
 
         try:
             logger.info(f"🔄 Starting FIRMS poll (run_id={run_id})")
@@ -109,9 +112,12 @@ class FIRMSCollector:
 
             # Log ingestion run
             run_duration = (datetime.utcnow() - run_start).total_seconds()
+            result["source_errors"] = self._last_source_errors
+            result["error_count"] = result.get("error_count", 0) + len(self._last_source_errors)
+            run_success = result["error_count"] == 0
             await self._log_ingestion_run(
                 run_id=run_id,
-                success=True,
+                success=run_success,
                 record_count=len(events),
                 deduplicated_count=result.get("deduplicated_count", 0),
                 duplicate_count=result.get("duplicate_count", 0),
@@ -124,12 +130,12 @@ class FIRMSCollector:
                 f"fetched={len(events)}, "
                 f"deduplicated={result.get('deduplicated_count', 0)}, "
                 f"duplicates={result.get('duplicate_count', 0)}, "
-                f"errors={result.get('error_count', 0)}, "
+                f"errors={result.get("error_count", 0)}, "
                 f"duration={run_duration:.1f}s"
             )
 
             return {
-                "success": True,
+                "success": run_success,
                 "run_id": run_id,
                 **result
             }
@@ -153,72 +159,64 @@ class FIRMSCollector:
             }
 
     async def _fetch_firms_events(self) -> List[Dict]:
-        """Fetch events from FIRMS API with retry/backoff logic"""
+        """Fetch records from every supported VIIRS feed, retaining partial successes."""
         min_lat, min_lon, max_lat, max_lon = self.config.firms_bbox_tuple
+        events: List[Dict] = []
+        source_errors: List[str] = []
+        for source in FIRMS_SOURCES:
+            try:
+                events.extend(await self._fetch_firms_source(source, min_lat, min_lon, max_lat, max_lon))
+            except Exception as error:
+                source_errors.append(f"{source}: {error}")
+                logger.error(f"FIRMS source {source} failed: {error}")
 
-        # Use VIIRS 375m for higher resolution (available globally)
+        self._last_source_errors = source_errors
+        if not events and source_errors:
+            raise RuntimeError("All FIRMS feeds failed: " + "; ".join(source_errors))
+        return events
+
+    async def _fetch_firms_source(
+        self,
+        source: str,
+        min_lat: float,
+        min_lon: float,
+        max_lat: float,
+        max_lon: float,
+    ) -> List[Dict]:
         url = (
-            f"{FIRMS_API_BASE}/data/VIIRS_SNPP_NRT/"
-            f"csv/{self.config.FIRMS_MAP_KEY}?"
-            f"north={max_lat}&south={min_lat}&"
-            f"east={max_lon}&west={min_lon}"
+            f"https://firms.modaps.eosdis.nasa.gov/api/area/csv/"
+            f"{self.config.FIRMS_MAP_KEY}/{source}/"
+            f"{min_lon},{min_lat},{max_lon},{max_lat}/1"
         )
-
-        logger.debug(f"Fetching from FIRMS: bbox=({min_lat},{min_lon},{max_lat},{max_lon})")
-
-        max_retries = 3
         backoff_seconds = 1
-
-        for attempt in range(max_retries):
+        for attempt in range(3):
             try:
                 async with aiohttp.ClientSession() as session:
-                    async with session.get(url, timeout=aiohttp.ClientTimeout(total=30)) as resp:
-                        if resp.status == 200:
-                            csv_text = await resp.text()
-                            logger.info(f"✓ FIRMS API response received (attempt {attempt + 1})")
-
-                            # Store raw payload
-                            await self._store_raw_payload(csv_text)
-
-                            # Parse CSV
+                    async with session.get(url, timeout=aiohttp.ClientTimeout(total=30)) as response:
+                        if response.status == 200:
+                            csv_text = await response.text()
+                            payload_uri, payload_hash = await self._store_raw_payload(csv_text)
                             events = self._parse_firms_csv(csv_text)
+                            for event in events:
+                                event["_raw_payload_uri"] = payload_uri
+                                event["_raw_payload_sha256"] = payload_hash
+                            logger.info(f"FIRMS {source} returned {len(events)} rows")
                             return events
 
-                        elif resp.status in (429, 504):
-                            # Rate limit or gateway error - retry
-                            error_text = await resp.text()
-                            logger.warning(
-                                f"FIRMS API returned {resp.status} (attempt {attempt + 1}/{max_retries}): {error_text[:100]}"
-                            )
-                            if attempt < max_retries - 1:
-                                await asyncio.sleep(backoff_seconds)
-                                backoff_seconds *= 2
-                                continue
-                            else:
-                                raise Exception(f"FIRMS API returned {resp.status} after {max_retries} retries")
+                        response_text = await response.text()
+                        if response.status in (429, 504) and attempt < 2:
+                            logger.warning(f"FIRMS {source} returned {response.status}: {response_text[:100]}")
+                            await asyncio.sleep(backoff_seconds)
+                            backoff_seconds *= 2
+                            continue
+                        raise RuntimeError(f"FIRMS {source} returned {response.status}: {response_text[:200]}")
+            except (asyncio.TimeoutError, aiohttp.ClientError) as error:
+                if attempt == 2:
+                    raise RuntimeError(f"FIRMS {source} failed after 3 attempts: {error}") from error
+                await asyncio.sleep(backoff_seconds)
+                backoff_seconds *= 2
 
-                        else:
-                            raise Exception(f"FIRMS API returned {resp.status}: {await resp.text()}")
-
-            except asyncio.TimeoutError:
-                logger.warning(f"FIRMS API request timed out (attempt {attempt + 1}/{max_retries})")
-                if attempt < max_retries - 1:
-                    await asyncio.sleep(backoff_seconds)
-                    backoff_seconds *= 2
-                    continue
-                else:
-                    raise Exception(f"FIRMS API timeout after {max_retries} retries")
-
-            except aiohttp.ClientError as e:
-                logger.warning(f"FIRMS API client error (attempt {attempt + 1}/{max_retries}): {e}")
-                if attempt < max_retries - 1:
-                    await asyncio.sleep(backoff_seconds)
-                    backoff_seconds *= 2
-                    continue
-                else:
-                    raise
-
-        raise Exception("FIRMS API fetch failed after all retries")
+        raise RuntimeError(f"FIRMS {source} failed after all retries")
 
     async def _store_raw_payload(self, csv_text: str) -> Tuple[str, str]:
         """
@@ -326,8 +324,11 @@ class FIRMSCollector:
 
                 else:
                     # New canonical event
-                    await self._insert_event(event, run_id)
-                    deduplicated_count += 1
+                    inserted = await self._insert_event(event, run_id)
+                    if inserted:
+                        deduplicated_count += 1
+                    else:
+                        duplicate_count += 1
 
             except Exception as e:
                 logger.warning(f"Error ingesting event: {e}")
@@ -368,39 +369,84 @@ class FIRMSCollector:
             logger.debug(f"Event ({latitude}, {longitude}) outside India. Skipping.")
             return None
 
-        # Dedup key: (lat, lon, acq_time, satellite)
-        # Round to 4 decimals (~11m accuracy)
-        dedup_key = f"{latitude:.4f},{longitude:.4f},{acquisition_time.isoformat()},{raw_event.get('satellite', 'unknown')}"
+        raw_satellite = str(raw_event.get("satellite", "unknown")).strip()
+        satellite_code = raw_satellite.upper()
+        satellite_values = {
+            "N20": ("N20", "NOAA20"),
+            "NOAA-20": ("N20", "NOAA20"),
+            "N21": ("N21", "NOAA21"),
+            "NOAA-21": ("N21", "NOAA21"),
+            "N": ("SNPP", "SNPP"),
+            "SUOMI NPP": ("SNPP", "SNPP"),
+            "SUOMI-NPP": ("SNPP", "SNPP"),
+        }
+        model_satellite, source_satellite = satellite_values.get(
+            satellite_code,
+            (satellite_code, satellite_code),
+        )
 
-        brightness_val = raw_event.get("brightness") or raw_event.get("bright_ti4")
-        brightness = float(brightness_val) if brightness_val else None
+        confidence_value = str(raw_event.get("confidence", "")).strip().lower()
+        confidence_class = confidence_value if confidence_value in {"l", "n", "h"} else None
+        if confidence_class is None and confidence_value.isdigit():
+            numeric_value = int(confidence_value)
+            confidence_class = "h" if numeric_value >= 80 else "l" if numeric_value <= 30 else "n"
+
+        # Dedup key uses the unmodified FIRMS satellite code.
+        # Round to 4 decimals (~11m accuracy)
+        dedup_key = f"{latitude:.4f},{longitude:.4f},{acquisition_time.isoformat()},{raw_satellite}"
+
+        brightness_val = raw_event.get("bright_ti4") or raw_event.get("brightness")
+        brightness = float(brightness_val) if brightness_val not in (None, "") else None
+        bright_ti5_value = raw_event.get("bright_ti5")
+        bright_ti5 = float(bright_ti5_value) if bright_ti5_value not in (None, "") else None
 
         frp = raw_event.get("frp")
         frp = float(frp) if frp else None
 
-        confidence = raw_event.get("confidence")
-        confidence = int(confidence) if confidence else None
+        confidence_raw = raw_event.get("confidence")
+        if confidence_raw:
+            if isinstance(confidence_raw, (int, float)):
+                confidence = int(confidence_raw)
+            elif str(confidence_raw).isdigit():
+                confidence = int(confidence_raw)
+            elif str(confidence_raw).lower() == 'h':
+                confidence = 90
+            elif str(confidence_raw).lower() == 'n':
+                confidence = 60
+            elif str(confidence_raw).lower() == 'l':
+                confidence = 30
+            else:
+                confidence = 50
+        else:
+            confidence = None
+
+        day_night = raw_event.get("day_night") or raw_event.get("daynight") or "N"
 
         event = {
             "id": str(uuid4()),
             "acquisition_time": acquisition_time,  # Pass datetime object, not ISO string
-            "satellite": raw_event.get("satellite", "unknown"),
+            "satellite": raw_satellite,
+            "model_satellite": model_satellite,
+            "source_satellite": source_satellite,
             "instrument": raw_event.get("instrument", "VIIRS"),
             "brightness": brightness,
+            "bright_ti5": bright_ti5,
+            "confidence_class": confidence_class,
             "brightness_rad": raw_event.get("brightness_rad"),
             "frp": frp,
             "confidence": confidence,
             "scan": raw_event.get("scan"),
             "track": raw_event.get("track"),
-            "day_night": raw_event.get("day_night", "N"),
+            "day_night": day_night,
             "latitude": latitude,
             "longitude": longitude,
             "point": f"POINT({longitude} {latitude})",
-            "raw_payload_uri": None,  # Set after raw payload stored
-            "raw_payload_sha256": None,
+            "raw_payload_uri": raw_event.get("_raw_payload_uri"),
+            "raw_payload_sha256": raw_event.get("_raw_payload_sha256"),
             "pipeline_version": "1.0.0",
             "ingestion_run_id": run_id,
             "dedup_key": dedup_key,
+            "created_at": datetime.utcnow(),  # Add created_at timestamp for trigger
         }
 
         return event
@@ -429,30 +475,53 @@ class FIRMSCollector:
 
         return result[0]["id"] if result else None
 
-    async def _insert_event(self, event: Dict, run_id: str):
+    async def _insert_event(self, event: Dict, run_id: str) -> bool:
         """Insert new canonical thermal event"""
         query = """
             INSERT INTO thermal_events (
                 id, acquisition_time, satellite, instrument,
-                brightness, brightness_rad, frp, confidence,
+                brightness, bright_ti5, confidence, confidence_class,
+                model_satellite, source_satellite, brightness_rad, frp,
                 scan, track, day_night,
-                latitude, longitude,
+                latitude, longitude, point,
                 raw_payload_uri, raw_payload_sha256,
                 pipeline_version, ingestion_run_id,
+                created_at,
                 status
             ) VALUES (
                 :id, :acquisition_time, :satellite, :instrument,
-                :brightness, :brightness_rad, :frp, :confidence,
+                :brightness, :bright_ti5, :confidence, :confidence_class,
+                :model_satellite, :source_satellite, :brightness_rad, :frp,
                 :scan, :track, :day_night,
                 :latitude, :longitude,
+                ST_GeomFromText(:point, 4326),
                 :raw_payload_uri, :raw_payload_sha256,
                 :pipeline_version, :ingestion_run_id,
+                :created_at,
                 'active'
             )
         """
 
-        await self.db.execute_update(query, event)
-        logger.debug(f"Inserted event: {event['id']}")
+        try:
+            await self.db.execute_update(query, event)
+            logger.debug(f"Inserted event: {event['id']}")
+            return True
+        except Exception as e:
+            # If insert fails due to uniqueness constraint, treat as duplicate
+            if "unique constraint" in str(e).lower() or "duplicate key" in str(e).lower():
+                logger.debug(f"Duplicate detected via constraint violation: {event['dedup_key']}")
+                # Try to get the existing event ID
+                existing_id = await self._check_duplicate(event)
+                if existing_id:
+                    await self._mark_duplicate(
+                        canonical_id=existing_id,
+                        dedup_key=event['dedup_key'],
+                        run_id=run_id
+                    )
+                return False
+            else:
+                # Re-raise if it's not a uniqueness issue
+                raise
 
     async def _mark_duplicate(self, canonical_id: str, dedup_key: str, run_id: str):
         """Mark incoming duplicate event without creating new row"""
@@ -519,6 +588,78 @@ class FIRMSCollector:
             except Exception as e:
                 logger.error(f"Error in polling loop: {e}", exc_info=True)
                 await asyncio.sleep(60)  # Wait before retry
+
+    async def reconcile_orphaned_ingestion_runs(self, since_hours: Optional[int] = None, dry_run: bool = False) -> Dict:
+        """Create ingestion_runs rows for active events whose ingestion_run_id has no parent run."""
+        query = """
+            SELECT te.ingestion_run_id::text AS ingestion_run_id,
+                   COUNT(*) AS event_count,
+                   MIN(te.acquisition_time) AS earliest_event,
+                   MAX(te.acquisition_time) AS latest_event
+            FROM thermal_events te
+            LEFT JOIN ingestion_runs ir ON te.ingestion_run_id::text = ir.id::text
+            WHERE te.status = 'active'
+              AND te.ingestion_run_id IS NOT NULL
+              AND ir.id IS NULL
+        """
+
+        if since_hours is not None:
+            query += " AND te.acquisition_time >= NOW() - INTERVAL ':hours hours'"
+            query = query.replace(':hours', str(since_hours))
+
+        query += " GROUP BY te.ingestion_run_id ORDER BY MAX(te.acquisition_time) DESC"
+
+        rows = await self.db.execute(query)
+        reconciled = 0
+        run_ids = []
+
+        for row in rows:
+            run_id = row.get("ingestion_run_id")
+            if not run_id:
+                continue
+            run_ids.append(run_id)
+            if dry_run:
+                reconciled += 1
+                continue
+
+            run_timestamp = row.get("latest_event") or datetime.utcnow()
+            if isinstance(run_timestamp, str):
+                try:
+                    run_timestamp = datetime.fromisoformat(run_timestamp.replace('Z', '+00:00'))
+                except ValueError:
+                    run_timestamp = datetime.utcnow()
+
+            try:
+                await self.db.execute_update(
+                    """
+                        INSERT INTO ingestion_runs (
+                            id, source, run_timestamp, bbox,
+                            record_count, deduplicated_count, duplicate_count, error_count,
+                            success, duration_seconds, next_scheduled_run, created_at
+                        ) VALUES (
+                            CAST(:id AS UUID), 'FIRMS', :run_timestamp, :bbox,
+                            :record_count, 0, 0, 0,
+                            TRUE, 0, NOW() + INTERVAL '15 minutes', NOW()
+                        )
+                        ON CONFLICT (id) DO NOTHING
+                    """,
+                    {
+                        "id": run_id,
+                        "run_timestamp": run_timestamp,
+                        "bbox": self.config.FIRMS_BBOX,
+                        "record_count": int(row.get("event_count") or 0),
+                    },
+                )
+                reconciled += 1
+            except Exception as exc:
+                logger.warning(f"Could not reconcile ingestion run {run_id}: {exc}")
+
+        return {
+            "orphaned_run_ids": len(rows),
+            "reconciled": reconciled,
+            "dry_run": dry_run,
+            "run_ids": run_ids,
+        }
 
     async def _fetch_newly_ingested_events(self, run_id: str) -> List[str]:
         """Fetch event IDs from a specific ingestion run"""

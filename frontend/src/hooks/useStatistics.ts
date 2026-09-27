@@ -6,12 +6,21 @@ import { normalizeStatistics } from '@/services/apiAdapter';
 export const useStatistics = () => {
   return useQuery<NormalizedStatistics | null, Error>({
     queryKey: ['statistics'],
+
     queryFn: async () => {
       const response = await apiService.get('/events/statistics');
-      if (!response.data) return null;
+
+      if (!response.data) {
+        return null;
+      }
+
       return normalizeStatistics(response.data);
     },
-    // Refetch every 5 minutes for statistics (less frequent than events)
+
+    // Refetch statistics every 5 minutes.
     refetchInterval: 300000,
+
+    // Retry once if the request fails.
+    retry: 1,
   });
 };

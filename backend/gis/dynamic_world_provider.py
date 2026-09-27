@@ -6,7 +6,7 @@ Graceful fallback when credentials unavailable
 
 import logging
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, Optional, Tuple
 from uuid import uuid4
 
@@ -38,13 +38,38 @@ class DynamicWorldProvider:
     Includes PostgreSQL caching to avoid redundant EE calls.
     """
 
-    def __init__(self, db, config):
+    def __init__(self, db=None, config=None):
+        # Support both legacy usage (db, config) and the standalone verification
+        # pattern used in tests (config only).
+        if config is None:
+            config = db
+            db = None
+
         self.db = db
         self.config = config
+        if self.config is None:
+            raise ValueError("DynamicWorldProvider requires a Config instance")
+
         self.ee_client = None
         self.credentials_available = False
         self.cache_ttl = 30 * 24 * 3600  # 30 days cache for land cover
         self._initialize_earth_engine()
+
+    @staticmethod
+    def _has_usable_land_cover(data: Dict[str, Any]) -> bool:
+        label = data.get("land_cover_label")
+        probabilities = data.get("class_probabilities") or {}
+        expected_classes = set(LAND_COVER_CLASSES.values())
+
+        if label not in expected_classes or set(probabilities) != expected_classes:
+            return False
+
+        try:
+            values = [float(probabilities[class_name]) for class_name in expected_classes]
+        except (TypeError, ValueError):
+            return False
+
+        return all(math.isfinite(value) and 0.0 <= value <= 1.0 for value in values) and sum(values) > 0
 
     def _initialize_earth_engine(self):
         """
@@ -118,9 +143,14 @@ class DynamicWorldProvider:
         cache_key = f"14/{tile_x}/{tile_y}"
         cached_data = await self._get_cache(cache_key, qtype)
         
-        if cached_data:
+        if cached_data and self._has_usable_land_cover(cached_data):
             logger.debug(f"Dynamic World cache hit for {cache_key} {qtype}")
-            return cached_data
+            cached_result = dict(cached_data)
+            cached_result["source_coverage_state"] = cached_data.get("coverage_state")
+            cached_result["coverage_state"] = "cached"
+            return cached_result
+        if cached_data:
+            logger.info(f"Ignoring unusable Dynamic World cache entry for {cache_key} {qtype}")
 
         if not self.credentials_available:
             if getattr(self.config, "DEMO_MODE", False):
@@ -142,8 +172,8 @@ class DynamicWorldProvider:
                 event_lat, event_lon, acquisition_date, buffer_km
             )
             
-            # Cache the result
-            if result.get("coverage_state") != "source_unavailable":
+            # Cache only usable results so missing pixels do not suppress future retries.
+            if result.get("coverage_state") == "live" and self._has_usable_land_cover(result):
                 await self._set_cache(cache_key, qtype, result)
             
             return result
@@ -185,66 +215,102 @@ class DynamicWorldProvider:
             # Query Dynamic World
             dw = ee.ImageCollection(DYNAMIC_WORLD_DATASET)
 
-            # Filter by date (within 30 days of acquisition)
-            start_date = (acq_dt - timedelta(days=15)).strftime("%Y-%m-%d")
-            end_date = (acq_dt + timedelta(days=15)).strftime("%Y-%m-%d")
+            acquisition_ee_date = ee.Date(acq_dt.strftime("%Y-%m-%d"))
 
-            # Apply filters
-            dw_filtered = (
-                dw
-                .filterDate(start_date, end_date)
-                .filterBounds(buffered_point)
-            )
+            def collection_for_window(window_days):
+                start_date = (acq_dt - timedelta(days=window_days)).strftime("%Y-%m-%d")
+                end_date = (acq_dt + timedelta(days=window_days + 1)).strftime("%Y-%m-%d")
+                return (
+                    dw
+                    .filterDate(start_date, end_date)
+                    .filterBounds(buffered_point)
+                )
 
-            # Check if we have any images
-            size = dw_filtered.size().getInfo()
-            if size == 0:
-                logger.warning(
-                    f"No Dynamic World data available for {event_lat},{event_lon} "
-                    f"near {acquisition_date}"
+            def add_query_metadata(image):
+                image = ee.Image(image)
+                image_date = image.date()
+                date_band = (
+                    ee.Image.constant(image_date.millis())
+                    .rename("dw_image_time")
+                    .toInt64()
+                    .updateMask(image.select("label").mask())
+                )
+                distance_days = image_date.difference(acquisition_ee_date, "day").abs()
+                return image.addBands(date_band).set("_acquisition_distance_days", distance_days)
+
+            query_date = datetime.utcnow().isoformat()
+            def sample_collection(collection):
+                # mosaic() uses the last unmasked pixel; sort farthest-first so
+                # the closest valid scene to acquisition time has priority.
+                image = (
+                    collection
+                    .map(add_query_metadata)
+                    .sort("_acquisition_distance_days", False)
+                    .mosaic()
+                )
+
+                for region, sampling_method in (
+                    (point, "point"),
+                    (point.buffer(30), "buffer_30m"),
+                ):
+                    sample = image.reduceRegion(
+                        reducer=ee.Reducer.first(),
+                        geometry=region,
+                        scale=10,
+                        bestEffort=True
+                    )
+                    sample_results = sample.getInfo() or {}
+                    sample_label, sample_probs = self._parse_dw_results(sample_results)
+                    if self._has_usable_land_cover({
+                        "land_cover_label": sample_label,
+                        "class_probabilities": sample_probs
+                    }):
+                        return sample_results, sample_label, sample_probs, sampling_method
+                return None
+
+            selected_window_days = 15
+            selected_collection = collection_for_window(selected_window_days)
+            has_scenes = selected_collection.size().getInfo() > 0
+            sample_result = sample_collection(selected_collection) if has_scenes else None
+
+            if sample_result is None:
+                selected_window_days = 30
+                selected_collection = collection_for_window(selected_window_days)
+                has_scenes = selected_collection.size().getInfo() > 0
+                sample_result = sample_collection(selected_collection) if has_scenes else None
+
+            if sample_result is None:
+                coverage_state = "no_valid_pixel" if has_scenes else "coverage_unknown"
+                logger.info(
+                    f"No usable Dynamic World pixel at {event_lat},{event_lon} "
+                    f"within +/-{selected_window_days} days of {acquisition_date}"
                 )
                 return {
                     "source": "google_dynamic_world",
                     "land_cover_label": None,
                     "class_probabilities": {},
-                    "coverage_state": "coverage_unknown",
-                    "provider_version": "1.0.0"
+                    "acquisition_date": acquisition_date,
+                    "query_date": query_date,
+                    "coverage_state": coverage_state,
+                    "temporal_window_days": selected_window_days,
+                    "provider_version": "1.0.0",
+                    "dataset_id": DYNAMIC_WORLD_DATASET
                 }
 
-            # Get the first image
-            dw_image = dw_filtered.first()
+            results, label, probs, sampling_method = sample_result
 
-            # Additional safety check
-            if dw_image is None:
-                logger.warning(
-                    f"Dynamic World collection size > 0 but first() returned None for {event_lat},{event_lon}"
-                )
-                return {
-                    "source": "google_dynamic_world",
-                    "land_cover_label": None,
-                    "class_probabilities": {},
-                    "coverage_state": "coverage_unknown",
-                    "provider_version": "1.0.0"
-                }
-
-            # Sample classification at point using reduceRegion
-            # Based on our test, Dynamic World returns the actual class probabilities as direct band values
-            # and a 'label' band with the classification index
-            sample = dw_image.reduceRegion(
-                reducer=ee.Reducer.first(),
-                geometry=point,
-                scale=10,  # 10m scale
-                bestEffort=True
+            image_timestamp = results.get("dw_image_time")
+            if isinstance(image_timestamp, list):
+                image_timestamp = image_timestamp[0] if image_timestamp else None
+            image_date = (
+                datetime.fromtimestamp(float(image_timestamp) / 1000, tz=timezone.utc)
+                .strftime("%Y-%m-%d")
+                if image_timestamp is not None else None
             )
-
-            # Extract results
-            results = sample.getInfo()
-
-            # Parse results and extract dominant class and probabilities
-            label, probs = self._parse_dw_results(results)
-
-            # Get image date
-            image_date = ee.Image(dw_image).date().format('YYYY-MM-dd').getInfo()
+            image_age_days = (
+                abs((datetime.strptime(image_date, "%Y-%m-%d").date() - acq_dt.date()).days)
+                if image_date is not None else None
+            )
 
             return {
                 "source": "google_dynamic_world",
@@ -252,7 +318,10 @@ class DynamicWorldProvider:
                 "class_probabilities": probs,
                 "image_date": image_date,
                 "acquisition_date": acquisition_date,
-                "query_date": datetime.utcnow().isoformat(),
+                "query_date": query_date,
+                "sampling_method": sampling_method,
+                "temporal_window_days": selected_window_days,
+                "image_age_days": image_age_days,
                 "coverage_state": "live",
                 "provider_version": "1.0.0",
                 "dataset_id": DYNAMIC_WORLD_DATASET
@@ -302,11 +371,14 @@ class DynamicWorldProvider:
 
             # Get dominant class label
             dominant_label = LAND_COVER_CLASSES.get(classification_idx, "unknown")
+            if dominant_label == "unknown":
+                return None, {}
 
             # Extract probability values for each class
             # The actual band names in the response match our LAND_COVER_CLASSES
             # with minor naming differences we need to handle
             class_probs = {}
+            observed_probabilities = 0
             for class_idx, class_label in LAND_COVER_CLASSES.items():
                 # Map our internal class names to the actual band names in Earth Engine response
                 band_name_map = {
@@ -323,6 +395,7 @@ class DynamicWorldProvider:
                     else:
                         prob_value = float(prob_value)
                     class_probs[class_label] = round(prob_value, 4)
+                    observed_probabilities += 1
                 else:
                     # If the exact band name isn't found, try without mapping
                     prob_value = results.get(class_label)
@@ -332,13 +405,20 @@ class DynamicWorldProvider:
                         else:
                             prob_value = float(prob_value)
                         class_probs[class_label] = round(prob_value, 4)
+                        observed_probabilities += 1
                     else:
                         class_probs[class_label] = 0.0
 
+            if observed_probabilities != len(LAND_COVER_CLASSES):
+                logger.debug("Incomplete Dynamic World probability bands in Earth Engine response")
+                return None, {}
+
             # Normalize probabilities to sum to 1.0 (they should already sum to ~1.0)
             total_prob = sum(class_probs.values())
-            if total_prob > 0:
-                class_probs = {k: round(v / total_prob, 4) for k, v in class_probs.items()}
+            if total_prob <= 0:
+                logger.debug("Dynamic World response contains no probability mass")
+                return None, {}
+            class_probs = {k: round(v / total_prob, 4) for k, v in class_probs.items()}
 
             logger.debug(
                 f"Parsed Dynamic World results: "
@@ -400,6 +480,9 @@ class DynamicWorldProvider:
 
     async def _get_cache(self, cache_key: str, query_type: str) -> Optional[Dict]:
         """Get cached query result from PostgreSQL if not expired"""
+        if self.db is None:
+            return None
+
         try:
             result = await self.db.execute_one(
                 """
@@ -429,6 +512,9 @@ class DynamicWorldProvider:
 
     async def _set_cache(self, cache_key: str, query_type: str, data: Dict):
         """Store query result in PostgreSQL cache (using osm_cache table)"""
+        if self.db is None:
+            return
+
         try:
             tile_z, tile_x, tile_y = map(int, cache_key.split('/'))
             now_dt = datetime.utcnow()

@@ -62,7 +62,13 @@ def map_to_sih_category(
             - is_persistent: bool (whether event is persistent)
     """
     # Extract ML prediction components
-    ml_category = ml_prediction.get("category", "unknown")
+    raw_ml_category = str(ml_prediction.get("category", "unknown")).strip().casefold()
+    category_aliases = {
+        "industrial fire": "industrial",
+        "agricultural fire": "agricultural",
+        "wildfire / natural fire": "wildfire",
+    }
+    ml_category = category_aliases.get(raw_ml_category, raw_ml_category)
     ml_confidence = ml_prediction.get("confidence", 0.0)
     ml_probabilities = ml_prediction.get("probabilities", {})
     model_type = ml_prediction.get("model_type", "Unknown")

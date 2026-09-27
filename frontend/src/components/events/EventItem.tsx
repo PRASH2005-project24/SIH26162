@@ -9,11 +9,24 @@ interface EventItemProps {
 
 export const EventItem = ({ event }: EventItemProps) => {
   const { selectEvent, selectedEvent } = useSelectedEventContext();
-  const { event_id, latitude, longitude, frp, classification, confidence, location, risk_score, risk_level, industrial_context, land_cover, raw } = event;
+  const {
+    event_id,
+    latitude,
+    longitude,
+    frp,
+    classification,
+    confidence,
+    location,
+    industrial_context,
+    land_cover,
+    satellite_name,
+    raw,
+  } = event;
 
   const sihCategory = classification || 'Unknown / Other';
   const isSelected = selectedEvent?.event_id === event_id;
   const acquisitionTime = raw?.acquisition_time || event.satellite?.acquisition_date || new Date().toISOString();
+  const confPercent = Math.round(confidence <= 1 ? confidence * 100 : confidence);
 
   return (
     <div
@@ -28,38 +41,50 @@ export const EventItem = ({ event }: EventItemProps) => {
         <div>
           <div className="flex items-center gap-2">
             <SiHCategoryBadge category={sihCategory as SIHCategory} />
-            <span className="text-xs font-bold text-gray-500">
+            <span className="text-xs font-bold text-gray-800 dark:text-gray-200">
               {location.city}, {location.state}
             </span>
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            {new Date(acquisitionTime).toLocaleString()}
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+            {new Date(acquisitionTime).toLocaleString('en-IN', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
           </p>
         </div>
         <div className="text-right">
-          <div className="text-xs font-bold text-red-500">
-            Score: {risk_score} ({risk_level})
+          <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+            {confPercent}% Conf.
           </div>
           {frp !== null && frp !== undefined && (
-            <div className="text-xs text-gray-400 mt-0.5">
+            <div className="text-[11px] text-gray-600 dark:text-gray-300 font-semibold mt-0.5">
               FRP: {frp.toFixed(1)} MW
             </div>
           )}
         </div>
       </div>
 
-      <div className="mt-3 text-xs text-gray-600 dark:text-gray-300 space-y-1">
-        <div>
-          <span className="font-semibold text-gray-700 dark:text-gray-200">Coordinates:</span> {latitude.toFixed(3)}°, {longitude.toFixed(3)}°
+      <div className="mt-3 text-xs text-gray-600 dark:text-gray-300 space-y-1 pt-2 border-t border-gray-100 dark:border-gray-700/60">
+        <div className="flex justify-between">
+          <span className="text-gray-500 dark:text-gray-400">Coordinates:</span>
+          <span className="font-mono text-gray-800 dark:text-gray-200">{latitude.toFixed(3)}°, {longitude.toFixed(3)}°</span>
         </div>
-        <div>
-          <span className="font-semibold text-gray-700 dark:text-gray-200">Confidence:</span> {Math.round(confidence * 100)}%
+        <div className="flex justify-between">
+          <span className="text-gray-500 dark:text-gray-400">Sensor / Sat:</span>
+              <span className="font-medium text-gray-800 dark:text-gray-200">{satellite_name || 'Not available'}</span>
         </div>
-        <div>
-          <span className="font-semibold text-gray-700 dark:text-gray-200">Industrial Proximity:</span> {industrial_context.osm_proximity}
+        <div className="flex justify-between">
+          <span className="text-gray-500 dark:text-gray-400">Industrial:</span>
+          <span className="font-medium text-gray-800 dark:text-gray-200 truncate max-w-[180px]">
+            {industrial_context?.osm_proximity || '--'}
+          </span>
         </div>
-        <div>
-          <span className="font-semibold text-gray-700 dark:text-gray-200">Land Cover (Built):</span> {land_cover.Built}%
+        <div className="flex justify-between">
+          <span className="text-gray-500 dark:text-gray-400">Built Land Cover:</span>
+          <span className="font-medium text-gray-800 dark:text-gray-200">{land_cover ? `${land_cover.Built}%` : 'Not available'}</span>
         </div>
       </div>
     </div>

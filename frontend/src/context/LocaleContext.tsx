@@ -172,7 +172,7 @@ const translations = {
     theme: 'Theme',
     language: 'Language',
     mapPreferences: 'Map Preferences',
-    demoLiveStatus: 'Demo/Live Status',
+    demoLiveStatus: 'Live Status',
 
     // Buttons
     close: 'Close',
@@ -268,7 +268,7 @@ const translations = {
     theme: 'テーマ',
     language: '言語',
     mapPreferences: 'マップ設定',
-    demoLiveStatus: 'デモ/ライブ状態',
+    demoLiveStatus: 'ライブ状態',
 
     // Buttons
     close: '閉じる',

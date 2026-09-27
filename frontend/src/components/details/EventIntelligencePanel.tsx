@@ -7,6 +7,7 @@ import { DynamicWorldSection } from './DynamicWorldSection';
 import { PersistenceSection } from './PersistenceSection';
 import { SIHClassificationSection } from '@/components/details/SIHClassificationSection';
 import { SiHCategoryBadge } from '@/components/ui/SiHCategoryBadge';
+import { Calendar, Flame, MapPin } from 'lucide-react';
 
 interface EventIntelligencePanelProps {
   event: ApiThermalEvent | null;
@@ -86,15 +87,15 @@ export const EventIntelligencePanel = ({ event, onClose }: EventIntelligencePane
 
           <div className="space-y-3">
             <div className="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-400">
-              <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center text-xs font-medium">
-                📅
+              <div className="w-6 h-6 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center text-xs font-medium">
+                <Calendar className="w-3.5 h-3.5 text-blue-500" />
               </div>
               <span>{new Date(acquisition_time).toLocaleString()}</span>
             </div>
 
             <div className="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-400">
-              <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center text-xs font-medium">
-                🔥
+              <div className="w-6 h-6 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center text-xs font-medium">
+                <Flame className="w-3.5 h-3.5 text-orange-500" />
               </div>
               <span>
                 {frp !== null && frp !== undefined
@@ -104,8 +105,8 @@ export const EventIntelligencePanel = ({ event, onClose }: EventIntelligencePane
             </div>
 
             <div className="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-400">
-              <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center text-xs font-medium">
-                📍
+              <div className="w-6 h-6 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center text-xs font-medium">
+                <MapPin className="w-3.5 h-3.5 text-emerald-500" />
               </div>
               <span>
                 {latitude !== null && longitude !== null

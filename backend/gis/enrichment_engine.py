@@ -185,6 +185,66 @@ class GISEnrichmentEngine:
             logger.error(f"Error enriching event {event_id}: {e}", exc_info=True)
             return {"status": "error", "reason": str(e)}
 
+    async def reconcile_missing_enrichment(
+        self,
+        since_hours: Optional[int] = 24,
+        limit: int = 200,
+        dry_run: bool = False,
+    ) -> Dict[str, Any]:
+        """Retry missing or partial GIS enrichment rows for recent active events."""
+        query = """
+            SELECT te.id
+            FROM thermal_events te
+            LEFT JOIN LATERAL (
+                SELECT *
+                FROM event_spatial_enrichment ese
+                WHERE ese.event_id = te.id
+                ORDER BY ese.created_at DESC
+                LIMIT 1
+            ) ese ON true
+            WHERE te.status = 'active'
+              AND (
+                    ese.id IS NULL
+                    OR ese.coverage_state IS NULL
+                    OR ese.coverage_state ILIKE '%dw:no_valid_pixel%'
+                    OR ese.coverage_state ILIKE '%dw:source_unavailable%'
+                    OR ese.coverage_state ILIKE '%osm:source_unavailable%'
+              )
+        """
+
+        if since_hours is not None:
+            query += " AND te.acquisition_time >= NOW() - INTERVAL ':hours hours'"
+            query = query.replace(':hours', str(since_hours))
+
+        query += " ORDER BY te.acquisition_time DESC LIMIT :limit"
+
+        rows = await self.db.execute(query, {"limit": limit})
+        event_ids = [row["id"] for row in rows]
+
+        if dry_run:
+            return {
+                "batch_size": len(event_ids),
+                "dry_run": True,
+                "event_ids": event_ids,
+                "successful": 0,
+                "failed": 0,
+            }
+
+        results = []
+        for event_id in event_ids:
+            results.append(await self.enrich_event(event_id))
+
+        successful = sum(1 for r in results if r.get("status") == "success")
+        failed = sum(1 for r in results if r.get("status") == "error")
+
+        return {
+            "batch_size": len(event_ids),
+            "dry_run": False,
+            "successful": successful,
+            "failed": failed,
+            "results": results,
+        }
+
     async def enrich_batch(self, event_ids: list = None, limit: int = 100) -> Dict[str, Any]:
         """
         Enrich a batch of events.

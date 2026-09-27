@@ -156,3 +156,9 @@ class Config:
         "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://localhost:8000,*"
     )
 
+    # ========================================================================
+    # Copernicus Data Space Ecosystem (Sentinel-2 Optical Preview)
+    # ========================================================================
+    CDSE_CLIENT_ID: str = os.getenv("CDSE_CLIENT_ID", "")
+    CDSE_CLIENT_SECRET: str = os.getenv("CDSE_CLIENT_SECRET", "")
+

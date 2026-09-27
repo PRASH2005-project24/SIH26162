@@ -73,3 +73,9 @@ docs/FireGuard_WEAKLABELS.csv
 docs/FireGuard_WEAKLABELS_FIXED.csv
 object-storage/
 *.tar.gz
+
+# Runtime application storage
+backend/data/storage/
+
+# Runtime generated Sentinel/cache files
+backend/data/storage/
